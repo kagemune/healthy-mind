@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="/CSS_General/Inicio_de_sesion.css">
+</head>
+<body>
+    
+    <div class="wrapper">
+        <img src="/Imagenes/logos/logo.png" alt="" class="logo_sup">
+
+        <!-- formulario de Inicio/Registro de sesión -->
+
+        <form action="" id="loginForm">
+            <h1 id="titulo">Iniciar sesión</h1>
+            
+            <div class="input-box hidden" id="nombre">
+                <input type="text" id="nombre" placeholder="Nombre" required maxlength="16">
+                <i class='bx bxs-user'></i>
+            </div>
+            
+            <div class="input-box" id="email-box">
+                <input type="email" id="email" placeholder="Correo electrónico" required>
+                <i class='bx bxs-envelope'></i>
+            </div>
+            
+            <div class="input-box" id="password-box">
+                <input type="password" id="password" placeholder="Contraseña" required>
+                <i class='bx bxs-lock-alt'></i>
+            </div>
+            
+            <!-- recuperar contraseña y recuerdame -->
+
+            <div class="recuerdame-olvide">
+                <label><input type="checkbox" id="remember"> Recuérdame</label>
+                <a href="#" id="btnOlvideContrasena">Olvidé mi contraseña</a>
+            </div>
+            
+            <!-- Apertura de modal terminos y condiciones -->
+
+            <div class="terms hidden" id="terms-box">
+                <label><input type="checkbox" id="terms"> Acepto los <a href="#" id="terms-open">términos y condiciones</a></label>
+            </div>
+
+            <!-- botones inferiores -->
+
+            <button type="submit" class="btn" id="submit-btn">Iniciar sesión</button>
+
+            <div class="buttons-box">
+                <button id="signUp" type="button">Registrarme</button>
+                <p>o</p>
+                <button id="signIn" type="button" class="disable">Iniciar sesión</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- modal de terminos y condiciones (ventana emergente) -->
+
+    <div class="modal" id="terms-modal">
+        <div class="modal-content">
+            <span class="modal-close" id="modal-close">X</span>
+            <div class="modal-header">
+                <h1>Términos y condiciones</h1>
+            </div>
+            <div class="terms-content">
+                
+                <h3> Términos y Condiciones de Healthy Mind <br> 31 de marzo de 2025</h3>
+
+                <h2> 1. Aceptación de los términos:</h2>
+                  
+                    <p>Al acceder o usar la aplicación Healthy Mind (en adelante, "la
+                  App"), usted acepta cumplir con estos Términos y Condiciones.
+                  Si no está de acuerdo con alguna de las condiciones aquí
+                  establecidas, le recomendamos no utilizar la App. </p>
+                  
+                <h2> 2. Descripción de la aplicación:</h2>
+                  
+                    <p>Healthy Mind es una aplicación diseñada para brindar apoyo 
+                  emocional a los usuarios a través de interacciones con otros usuarios, 
+                  terapeutas certificados y voluntarios entrenados, así como herramientas 
+                  de autoayuda y bienestar mental. La App proporciona acceso a 
+                  chats para facilitar el soporte emocional. </p>
+                  
+                <h2> 3. Requisitos de uso</h2>
+                 
+                    <p> Para usar Healthy Mind, debe ser mayor de  edad o tener 
+                  el consentimiento de un tutor legal. Los usuarios
+                  deben registrarse con información precisa y actualizada, y se
+                  comprometen a mantener la confidencialidad de su cuenta y
+                  contraseña. </p>
+                 
+                <h2>4. Uso de los servicios: </h2>
+
+                    <p>La App proporciona diversos servicios que incluyen, pero no se 
+                  limitan a, interacciones con terapeutas y voluntarios, acceso a 
+                  contenido educativo y herramientas de autoayuda. Al usar los 
+                  servicios, usted se compromete a hacerlo de manera respetuosa y 
+                  conforme a las normas de la comunidad. </p>
+                  
+                <h2> 5. Política de privacidad: </h2>
+                  
+                    <p>Su privacidad es importante para nosotros. Puede consultar
+                  nuestra Política de Privacidad para comprender cómo
+                  recopilamos, usamos y protegemos su información personal. </p>       <!--como?--> 
+                  
+                <h2> 6. Responsabilidad de los terapeutas y voluntarios:</h2>
+                  
+                    <p>Healthy Mind se esfuerza por proporcionar profesionales 
+                  cualificados para ayudar a los usuarios. Sin embargo, la App 
+                  no se hace responsable de los consejos proporcionados por los 
+                  terapeutas y/o voluntarios. El uso de los servicios de la App no 
+                  sustituye una consulta médica o psicológica profesional.</p>         <!--¿hay o no profesionales certificados?, ¿a quien se refiere cuando hay profecionales certificados?-->
+                  
+                <h2> 7. Limitaciones de responsabilidad: </h2>
+                  
+                    <p>La App y sus servicios: se proporcionan "tal
+                  cual" y "según disponibilidad". Healthy Mind no garantiza que
+                  el servicio sea ininterrumpido o libre de errores. No nos
+                  hacemos responsables de ningún daño directo, indirecto,
+                  incidental o consecuente derivado del uso de la App.</p>
+                  
+                <h2> 8. Prohibiciones Los usuarios no deben utilizar Healthy Mind para:</h2>
+                  
+                    <ul> 
+                        <li> Realizar actividades ilegales o fraudulentas. </li>
+                        <li> Publicar contenido que infrinja los derechos de propiedad intelectual o sea difamatorio, obsceno o perjudicial para otros usuarios.</li>
+                        <li> Hacer spam o enviar mensajes no solicitados.</li>
+                        <li> Suplantamiento de identidad.</li>
+                    </ul>
+                  
+                <h2> 9. Cancelación de cuentas: </h2>
+                  
+                    <p>En Healthy Mind se reserva el derecho de suspender o cancelar
+                  cuentas de usuarios que violen estos Términos y Condiciones.
+                  Los usuarios tambien podran cancelar su cuenta en el momento que
+                  desee, desde la configuración de la App. </p>
+                  
+                <h2> 10. Modificación de los términos y condiciones </h2>
+                  
+                    <p>Healthy Mind se reserva el derecho de modificar estos
+                  Términos y Condiciones en cualquier momento. Las
+                  modificaciones entrarán en vigor una vez que se publiquen en
+                  la App. Le recomendamos revisar periódicamente los Términos y
+                  Condiciones.</p> 
+                  
+                <h2> 11. Ley aplicable y jurisdicción:</h2>
+                   
+                    <p>Estos Términos y Condiciones se regirán e interpretarán de 
+                  acuerdo con las leyes de Colombia. Cualquier disputa relacionada 
+                  con estos términos será resuelta en los tribunales competentes de
+                  Colombia. </p>
+            </div>
+                
+            </div>
+            <div class="modal-footer">
+                <button class="modal-accept" id="accept-terms">Aceptar términos</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- modal de recuperacion de contraseña -->
+
+    <div id="modalRecuperacion" class="modal-recuperacion">
+        <div class="modal-recuperacion-contenido">
+            <div class="modal-recuperacion-header">
+                <h3>Recuperar contraseña</h3>
+                <span class="cerrar-modal" id="cerrarModalRecuperacion">&times;</span>
+            </div>
+            <div class="modal-recuperacion-body">
+                <p class="descripcion-recuperacion">
+                    Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña
+                </p>
+                <form class="formulario-recuperacion" id="formularioRecuperacion">
+                    <div class="campo-grupo">
+                        <label for="emailRecuperacion">Correo</label>
+                        <div class="input-box">
+                            <input type="email"
+                            id="emailRecuperacion"
+                            name="email"
+                            placeholder="ejemplo@email.com"
+                            required
+                            autocomplete="email">
+                        <i class='bx bxs-envelope'></i>
+                        </div>
+                    </div>
+                    <div class="botones-recuperacion">
+                        <button type="button" class="btn-cancelar" onclick="cerrarModalRecuperacion()">
+                            Cancelar
+                        </button>
+                        <button class="btn-recuperar" id="btnRecuperar" type="button">
+                            <span id="iconoCargaRecuperacion" class="icono-carga" style="display: none;">🔄</span>
+                            Enviar 
+                        </button>
+                    </div>
+                </form>
+                <div class="info-adicional">
+                    <small>
+                        <strong>Consejo</strong> Revisa tambien tu carpeta de spam tal vez te pueda llegar por ahi, uno nunca sabe ¯\_(ツ)_/¯
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Solo compat version) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Configuración de Firebase -->
+    <script src="/Java/base_de_datos_js/firebase-config.js"></script>
+    
+    <!-- JavaScript de la aplicación -->
+    <script src="/Java/inicio_de_sesion.js"></script>
+
+</body>
+</html>

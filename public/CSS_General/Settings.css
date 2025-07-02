@@ -1,0 +1,648 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        #config_body {
+            background-image: url('/Imagenes/imagenes/Ajustesclaro.jpg');
+  background-size: 400% 400%;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  font-family: 'Poppins', sans-serif;
+        }
+
+        /* Cuando el modal está activo, prevenir scroll */
+        #config_body.modal-open {
+            overflow: hidden;
+        }
+
+        @keyframes gradientBG {
+            0% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        /* Contenedor principal */
+        .config_container {
+            background: transparent;
+            background-image: linear-gradient(135deg, rgba(224, 195, 252, 0.3) 0%, rgba(142, 197, 252, 0.3) 50%, rgba(184, 160, 233, 0.3) 100%);
+            backdrop-filter: blur(10px);
+            width: 30vw;
+            height: 90vh;
+            padding: 20px;
+            text-align: left;
+            position: relative;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            animation: fadeIn 0.8s ease-out;
+            overflow-y: auto;
+            scrollbar-width: none; 
+            -ms-overflow-style: none;
+        }
+
+        .config_container::-webkit-scrollbar {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Título principal */
+        .config_container h2 {
+            text-align: center;
+            background-image: linear-gradient(135deg, #9d34ff 50%, #844af8 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-shadow: 0 2px 10px rgba(0, 128, 255, 0.3);
+            animation: pulse 2s infinite alternate;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            100% {
+                transform: scale(1.03);
+            }
+        }
+
+        /* Lista de configuraciones */
+        .config {
+            margin-top: 30px;
+            position: relative;
+            z-index: 1;
+            padding: 5px 2px;
+        }
+
+        .config_item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 12px;
+            cursor: pointer;
+            background-image: linear-gradient(135deg, #e5caff 50%, #cdb4ff 100%);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border-left: 4px solid transparent;
+            position: relative;
+            overflow: hidden;
+            max-width: 100%;
+            color: #000000;
+        }
+
+        #theme-status {
+            background: none; 
+            box-shadow: none; 
+            width: auto; 
+            height: auto; 
+            color: black;
+        }
+
+        .config_item:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 0;
+            background-image: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 50%, #b8a0e9 100%);
+            opacity: 0.2;
+            z-index: -1;
+            transition: width 0.4s ease;
+        }
+
+        .config_item:hover {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 10px 20px rgba(184, 160, 233, 0.15);
+            border-left: 4px solid #8ec5fc;
+        }
+
+        .config_item:hover:before {
+            width: 100%;
+        }
+
+        .config_item span {
+            margin-right: 15px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            background-image: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            border-radius: 50%;
+            color: white;
+            box-shadow: 0 4px 10px rgba(142, 197, 252, 0.3);
+            transition: transform 0.3s ease;
+        }
+
+        .config_item:hover span {
+            transform: rotate(360deg);
+        }
+
+        .config_item p {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 500;
+            transition: transform 0.3s ease;
+        }
+
+        .config_item:hover p {
+            transform: translateX(5px);
+            color: #8860d0;
+        }
+
+        /* Elementos peligrosos */
+        .danger {
+            color: #ff4d6d;
+        }
+
+        .danger span {
+            background-image: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+        }
+
+        .danger:hover {
+            border-left: 4px solid #ff758c;
+        }
+
+        .danger:hover p {
+            color: #ff4d6d;
+        }
+
+        /* MODAL STYLES - CORREGIDO */
+        .cambio_modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 9999;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .cambio_modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            position: relative;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            transform: scale(0.8);
+            animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        @keyframes modalSlideIn {
+            to {
+                transform: scale(1);
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #8ec5fc;
+            transition: all 0.3s ease;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(142, 197, 252, 0.1);
+        }
+
+        .close-btn:hover {
+            background: rgba(224, 195, 252, 0.3);
+            transform: rotate(90deg);
+            color: #6c5ce7;
+        }
+
+        .modal-content h2 {
+            background-image: linear-gradient(135deg, #8ec5fc 0%, #e0c3fc 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 2rem;
+            font-weight: 600;
+        }
+
+        .modal-text {
+            text-align: left;
+            line-height: 1.6;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
+            color: #333;
+        }
+
+        .modal-text::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-text::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        .modal-text::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #8ec5fc, #e0c3fc);
+            border-radius: 10px;
+        }
+
+        .modal-text h3 {
+            color: #8ec5fc;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .modal-text h4 {
+            color: #8ec5fc;
+            font-size: 1rem;
+            margin: 15px 0 8px 0;
+        }
+
+        .modal-text p {
+            margin-bottom: 12px;
+            color: #333;
+        }
+
+        .modal-text strong {
+            color: #8860d0;
+        }
+
+        .modal-text ul {
+            margin-left: 20px;
+            color: #333;
+        }
+
+        .modal-text li {
+            margin-bottom: 8px;
+        }
+
+        .scrollable .modal-content {
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .scrollable .modal-text {
+            max-height: none;
+        }
+
+        /* Input y button styles para modales futuras */
+        .modal-content input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+            box-sizing: border-box;
+        }
+
+        .modal-content input:focus {
+            border-color: #8ec5fc;
+            box-shadow: 0 0 0 3px rgba(142, 197, 252, 0.3);
+            outline: none;
+            transform: translateY(-2px);
+        }
+
+        .modal-content button {
+            background-image: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 50%, #b8a0e9 100%);
+            background-size: 200% auto;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.5s ease;
+            box-shadow: 0 5px 15px rgba(142, 197, 252, 0.3);
+        }
+
+        .modal-content button:hover {
+            background-position: right center;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(142, 197, 252, 0.4);
+        }
+
+        /* Botones específicos para confirmación */
+        .cancel-btn {
+            background: #6c757d !important;
+            background-image: none !important;
+        }
+
+        .cancel-btn:hover {
+            background: #5a6268 !important;
+            background-position: initial !important;
+        }
+
+        .confirm-deactivate-btn {
+            background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%) !important;
+            background-image: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%) !important;
+        }
+
+        .confirm-delete-btn {
+            background: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%) !important;
+            background-image: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%) !important;
+        }
+       /* RESPONSIVE PARA AJUSTES */
+@media screen and (width: 1200px) and (height: 800px) {
+  .config_container {
+    width: 35vw;
+    height: 500vh;
+  }
+}
+
+@media screen and (width: 1024px) and (height: 1366px) {
+  .config_container {
+    width: 70vw;
+    height: 60vh;
+  }
+}
+
+
+/* Tablets grandes */
+@media screen and (max-width: 1366px) and (min-width: 1201px) {
+  .config_container {
+    width: 40vw;
+    height: 90vh ;
+  }
+}
+
+/* Tablets medianas */
+@media screen and (max-width: 1024px) and (min-width: 769px) {
+  .config_container {
+    width: 70vw;
+    height: 55vh;
+  }
+}
+@media screen and (min-width: 819px) and (max-width: 821px) and (min-height: 1179px) and (max-height: 1181px) {
+  .config_container {
+    width: 70vw;
+    height: 65vh;
+  }
+}
+
+/* Tablets pequeñas */
+@media screen and (max-width: 768px) and (min-width: 481px) {
+  .config_container {
+    width: 65vw;
+    height: 85vh;
+  }
+}
+@media screen and (width: 853px) and (height: 1280px) {
+  .config_container {
+    width: 65vw;
+    height: 60vh;
+  }
+}
+
+/* Móviles grandes */
+@media screen and (max-width: 480px) and (min-width: 415px) {
+  .config_container {
+    width: 85vw;
+    height: 75vh;
+  }
+}
+
+/* Móviles medianos */
+@media screen and (max-width: 414px) and (min-width: 376px) {
+  .config_container {
+    width: 80vw;
+    height: 80vh;
+  }
+}
+
+/* Móviles pequeños */
+@media screen and (max-width: 375px) {
+  .config_container {
+    width: 75vw;
+    height: 85vh;
+  }
+}
+
+/* Móviles muy pequeños */
+@media screen and (max-width: 350px) {
+  .config_container {
+    width: 98vw;
+    height: 88vh;
+  }
+}
+@media screen and (width: 344px) and (height: 882px) {
+  .config_container {
+    width: 75vw;
+    height: 85vh;
+  }
+}
+
+/* Título responsive */
+@media (max-width: 670px) {
+  .config_container h2 {
+    font-size: 1.8rem;
+    letter-spacing: 0.5px;
+    text-shadow: 0 1px 5px rgba(142, 197, 252, 0.2);
+  }
+}
+@media screen and (width: 1024px) and (height: 600px) {
+  .config_container {
+    width: 55vw;
+    height: 90vh;
+  }
+}
+/*------------------------------------------------------------------------------------------------------------------------*/
+
+/*------------------------------------------------------------------------------------------------------------------------*/
+/* MODO OSCURO, OJO, AQUÍ SE DEBE AGREGAR CADA NUEVA OPCIÓN QUE QUERAMOS QUE TENGA EL MODO DARK MODE */
+/* CONFIGURACIONES PARA MODO OSCURO */
+#config_body.dark-mode {
+    background-image: url('/Imagenes/imagenes/Ajustesoscuro.jpg');
+    /* Asegúrate de que el background-size y background-position sean consistentes si cambias de un gradiente a una imagen */
+    background-size: cover; /* Añadido para que la imagen cubra todo el fondo */
+    background-position: center; /* Añadido para centrar la imagen */
+}
+
+.dark-mode .config_container {
+    background: rgba(50, 50, 50, 0.7);
+    background-image: linear-gradient(135deg, rgba(40, 40, 40, 0.4) 0%, rgba(70, 70, 70, 0.4) 50%, rgba(60, 60, 60, 0.4) 100%);
+}
+
+.dark-mode .config_container h2 {
+    background-image: linear-gradient(135deg, #ffffff 0%, #ffffff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent; /* Importante para que el gradiente sea visible */
+    text-shadow: 0 2px 10px rgba(200, 200, 200, 0.5);
+}
+
+.dark-mode .config_item {
+    background: rgba(50, 50, 50, 0.8);
+    color: white; /* Color de texto general para los ítems */
+}
+
+.dark-mode .config_item:before {
+    background-image: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 50%, #b8a0e9 100%);
+    opacity: 0.2;
+}
+
+.dark-mode .config_item:hover {
+    border-left: 4px solid #8ec5fc;
+    box-shadow: 0 10px 20px rgba(184, 160, 233, 0.15);
+}
+
+.dark-mode .config_item span {
+    background-image: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+}
+
+.dark-mode .config_item:hover span {
+    transform: rotate(360deg);
+}
+
+.dark-mode .config_item p {
+    color: #ddd; /* Color del texto dentro de los ítems de configuración */
+}
+
+.dark-mode .danger {
+    color: #ff4d6d; /* Color de texto para ítems peligrosos */
+}
+
+.dark-mode .danger span {
+    background-image: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+}
+
+.dark-mode .danger:hover {
+    border-left: 4px solid #ff758c;
+}
+
+/* Estado del tema en el ítem de configuración */
+.dark-mode #theme-status {
+    color: #ffffff;
+}
+
+/* Estilos para el modal cuando está activo */
+.dark-mode .cambio_modal.active .modal-content {
+    background: rgba(40, 40, 40, 0.95); /* Fondo del contenido del modal */
+    color: white; /* Color de texto general dentro del modal */
+}
+
+/* Estilos para los campos de entrada en el modal */
+.dark-mode .modal-content input {
+    background: rgba(80, 80, 80, 0.8);
+    color: white;
+    border-color: #555; /* Un borde más oscuro para los inputs en modo oscuro */
+}
+
+.dark-mode .modal-content input:focus {
+    border-color: #8ec5fc;
+    box-shadow: 0 0 0 3px rgba(142, 197, 252, 0.3);
+}
+
+/* Estilos para los botones en el modal */
+.dark-mode .modal-content button {
+    background-image: linear-gradient(135deg, #8ec5fc 0%, #b8a0e9 100%); /* Gradiente del botón */
+    box-shadow: 0 5px 15px rgba(142, 197, 252, 0.3);
+}
+
+.dark-mode .modal-content button:hover {
+    background-position: right center;
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(142, 197, 252, 0.4);
+}
+
+/* Estilos para el botón de cerrar modal */
+.dark-mode .close-btn {
+    color: #8ec5fc;
+    background: rgba(142, 197, 252, 0.1); /* Fondo del botón de cerrar */
+}
+
+.dark-mode .close-btn:hover {
+    background: rgba(224, 195, 252, 0.3);
+    color: #6c5ce7;
+}
+
+/* Estilos para el texto dentro de los modales */
+.dark-mode .modal-text {
+    color: #ddd; /* Color general del texto del modal */
+}
+
+.dark-mode .modal-text p {
+    color: #ddd; /* Color de los párrafos en el modal */
+}
+
+.dark-mode .modal-text h3,
+.dark-mode .modal-text h4 {
+    color: #8ec5fc; /* Color de los títulos H3 y H4 en el modal */
+}
+
+.dark-mode .modal-text strong {
+    color: #b8a0e9; /* Color de los textos en negrita en el modal */
+}
+
+.dark-mode .modal-text ul,
+.dark-mode .modal-text li {
+    color: #ddd; /* Color de listas y elementos de lista en el modal */
+}
+
+/* Scrollbar en modo oscuro para el modal-text */
+.dark-mode .modal-text::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1); /* Fondo de la barra de desplazamiento */
+}
+
+.dark-mode .modal-text::-webkit-scrollbar-thumb {
+    background: linear-gradient(135deg, #b8a0e9, #8ec5fc); /* Color del "pulgar" de la barra de desplazamiento */
+}

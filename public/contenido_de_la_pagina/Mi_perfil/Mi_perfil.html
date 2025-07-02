@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - Healthy Mind</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="stylesheet" href="/CSS_General/Mi_perfil.css">
+</head>
+<body>
+    <!-- Header con navegación -->
+    <header class="perfil-header">
+        <button class="btn-volver" id="btnVolver">
+            <i class="bi bi-arrow-left"></i>
+            Volver
+        </button>
+        <h1 class="perfil-titulo">Mi Perfil</h1>
+        <button class="btn-editar" id="btnEditarPerfil">
+            <i class="bi bi-pencil-fill"></i>
+            Editar
+        </button>
+    </header>
+
+    <!-- Contenedor principal -->
+    <main class="perfil-contenedor">
+        <!-- Sección de información del usuario -->
+        <section class="perfil-info">
+            <div class="perfil-avatar-container">
+                <!-- ✨ Avatar con botón de cambio -->
+                <div class="avatar-wrapper">
+                    <img id="perfilAvatar" class="perfil-avatar" src="/Imagenes/Avatares/Avatar1.jpg" alt="Avatar del usuario">
+                </div>
+                <div class="perfil-status" id="perfilStatus">
+                    <span class="status-indicator online"></span>
+                    <span class="status-text">En línea</span>
+                </div>
+            </div>
+            
+            <div class="perfil-datos">
+                <h2 class="perfil-nombre" id="perfilNombre">Usuario</h2>
+                <p class="perfil-bio" id="perfilBio"></p>
+                <p class="perfil-fecha-registro" id="perfilFechaRegistro"></p>
+            </div>
+        </section>
+
+        <!-- Estadísticas del usuario -->
+        <section class="perfil-estadisticas">
+            <div class="estadistica-item">
+                <div class="estadistica-numero" id="totalPublicaciones">0</div>
+                <div class="estadistica-label">Publicaciones</div>
+            </div>
+            <div class="estadistica-item">
+                <div class="estadistica-numero" id="totalNotas">0</div>
+                <div class="estadistica-label">Notas</div>
+            </div>
+            <div class="estadistica-item">
+                <div class="estadistica-numero" id="totalMeGusta">0</div>
+                <div class="estadistica-label">Me Gusta</div>
+            </div>
+            <div class="estadistica-item">
+                <div class="estadistica-numero" id="totalRespuestas">0</div>
+                <div class="estadistica-label">Respuestas</div>
+            </div>
+        </section>
+
+        <!-- Navegación de contenido -->
+        <section class="perfil-tabs">
+            <button class="tab-btn active" data-tab="publicaciones">
+                <i class="bi bi-grid-3x3-gap-fill"></i>
+                Publicaciones
+            </button>
+            <button class="tab-btn" data-tab="notas">
+                <i class="bi bi-file-earmark-text-fill"></i>
+                Notas
+            </button>
+            <button class="tab-btn" data-tab="megusta">
+                <i class="bi bi-heart-fill"></i>
+                Me Gusta
+            </button>
+            <button class="tab-btn" data-tab="respuestas">
+                <i class="bi bi-chat-fill"></i>
+                Respuestas
+            </button>
+        </section>
+
+        <!-- Contenido de las pestañas -->
+        <section class="perfil-contenido">
+            <!-- Tab Publicaciones -->
+            <div class="tab-content active" id="tab-publicaciones">
+                <div class="contenido-vacio">
+                    <i class="bi bi-grid-3x3-gap"></i>
+                    <h3>Sin publicaciones aún</h3>
+                    <p>Tus publicaciones aparecerán aquí</p>
+                </div>
+            </div>
+
+            <!-- Tab Notas -->
+            <div class="tab-content" id="tab-notas">
+                <div class="contenido-vacio">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <h3>Sin notas aún</h3>
+                    <p>Tus notas personales aparecerán aquí</p>
+                </div>
+            </div>
+
+            <!-- Tab Me Gusta -->
+            <div class="tab-content" id="tab-megusta">
+                <div class="contenido-vacio">
+                    <i class="bi bi-heart"></i>
+                    <h3>Sin me gusta aún</h3>
+                    <p>Las publicaciones que te gusten aparecerán aquí</p>
+                </div>
+            </div>
+
+            <!-- Tab Respuestas -->
+            <div class="tab-content" id="tab-respuestas">
+                <div class="contenido-vacio">
+                    <i class="bi bi-chat"></i>
+                    <h3>Sin respuestas aún</h3>
+                    <p>Tus respuestas a publicaciones aparecerán aquí</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal de edición de perfil -->
+    <div id="modalEditarPerfil" class="modal-editar">
+        <div class="modal-editar-contenido">
+            <div class="modal-header">
+                <h3>Editar Perfil</h3>
+                <span class="cerrar-modal" id="cerrarModalEditar">&times;</span>
+            </div>
+            
+            <form class="formulario-editar" id="formularioEditar">
+                <div class="campo-grupo">
+                    <label for="editarNombre">Nombre de usuario</label>
+                    <input type="text" id="editarNombre" name="nombre" placeholder="Ingresa tu nombre">
+                </div>
+                
+                <div class="campo-grupo">
+                    <label for="editarBio">Biografía</label>
+                    <textarea id="editarBio" name="bio" placeholder="Cuéntanos sobre ti..." rows="3"></textarea>
+                </div>
+                
+                <div class="botones-modal">
+                    <button type="button" class="btn-cancelar" id="btnCancelarEditar">Cancelar</button>
+                    <button type="submit" class="btn-guardar" id="btnGuardarPerfil">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (Solo compat version) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <!-- acciones -->
+    <script src="/Java/Mi_perfil.js"></script>
+
+    <!-- base de datos -->
+    <script src="/Java/Base_de_datos_js/firebase-config.js"></script>
+    <script src="/Java/Base_de_datos_js/auth-guard.js"></script>
+
+</body>
+</html>

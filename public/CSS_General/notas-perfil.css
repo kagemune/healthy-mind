@@ -1,0 +1,638 @@
+/* ====== ARCHIVO: notas-perfil.css ====== */
+/* Estilos para las notas dentro del perfil de usuario */
+
+/* ====== HEADER DE NOTAS PERFIL ====== */
+.notas-perfil-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px 20px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 15px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.notas-stats {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.stat-item {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 6px 12px;
+  background: rgba(123, 0, 230, 0.15);
+  border-radius: 20px;
+  color: #7b00e6;
+  border: 1px solid rgba(123, 0, 230, 0.2);
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.stat-item:hover {
+  background: rgba(123, 0, 230, 0.25);
+  transform: scale(1.05);
+}
+
+.notas-filtros {
+  display: flex;
+  align-items: center;
+}
+
+.filtro-select {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 25px;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.filtro-select:hover {
+  background: rgba(255, 255, 255, 1);
+  transform: scale(1.02);
+}
+
+.filtro-select:focus {
+  box-shadow: 0 0 0 3px rgba(123, 0, 230, 0.3);
+}
+
+/* ====== GRID DE NOTAS ====== */
+.notas-perfil-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  padding: 15px 0;
+}
+
+/* ====== TARJETAS DE NOTAS ====== */
+.nota-perfil-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  border-radius: 20px;
+  padding: 25px;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.4s ease;
+  cursor: pointer;
+  min-height: 220px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+
+.nota-perfil-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.nota-perfil-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 15px 40px rgba(123, 0, 230, 0.25);
+  border-color: rgba(123, 0, 230, 0.3);
+}
+
+.nota-perfil-card:hover::before {
+  opacity: 1;
+}
+
+.nota-perfil-card:active {
+  transform: translateY(-4px) scale(1.01);
+}
+
+/* ====== HEADER DE TARJETA ====== */
+.nota-perfil-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+  gap: 10px;
+}
+
+.nota-perfil-titulo {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0;
+  flex: 1;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.nota-perfil-indicadores {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.indicador {
+  font-size: 16px;
+  opacity: 0.9;
+  transition: all 0.3s ease;
+}
+
+.indicador:hover {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+/* ====== CONTENIDO DE TARJETA ====== */
+.nota-perfil-contenido {
+  flex: 1;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  text-align: justify;
+}
+
+/* ====== FOOTER DE TARJETA ====== */
+.nota-perfil-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  gap: 10px;
+}
+
+.nota-perfil-fecha {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 12px;
+  font-weight: 500;
+  flex: 1;
+}
+
+.btn-ver-nota-completa {
+  background: linear-gradient(135deg, rgba(123, 0, 230, 0.8), rgba(156, 77, 255, 0.8));
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+}
+
+.btn-ver-nota-completa:hover {
+  background: linear-gradient(135deg, rgba(123, 0, 230, 1), rgba(156, 77, 255, 1));
+  transform: scale(1.08);
+  box-shadow: 0 4px 15px rgba(123, 0, 230, 0.4);
+}
+
+.btn-ver-nota-completa:active {
+  transform: scale(1.05);
+}
+
+/* ====== BOTÓN CREAR NOTA ====== */
+.btn-crear-nota {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: linear-gradient(135deg, #7b00e6, #9c4dff);
+  color: white;
+  text-decoration: none;
+  padding: 15px 30px;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 16px;
+  margin: 20px auto;
+  transition: all 0.4s ease;
+  box-shadow: 0 6px 20px rgba(123, 0, 230, 0.3);
+  border: 2px solid transparent;
+}
+
+.btn-crear-nota:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 35px rgba(123, 0, 230, 0.4);
+  border-color: rgba(255, 255, 255, 0.2);
+  text-decoration: none;
+  color: white;
+}
+
+.btn-crear-nota:active {
+  transform: translateY(-1px);
+}
+
+/* ====== COLORES DE TARJETAS POR TIPO ====== */
+.nota-perfil-card.purple { 
+  border-left: 5px solid #7b00e6; 
+  box-shadow: 0 4px 15px rgba(123, 0, 230, 0.1);
+}
+
+.nota-perfil-card.blue { 
+  border-left: 5px solid #2196F3; 
+  box-shadow: 0 4px 15px rgba(33, 150, 243, 0.1);
+}
+
+.nota-perfil-card.green { 
+  border-left: 5px solid #4CAF50; 
+  box-shadow: 0 4px 15px rgba(76, 175, 80, 0.1);
+}
+
+.nota-perfil-card.yellow { 
+  border-left: 5px solid #FF9800; 
+  box-shadow: 0 4px 15px rgba(255, 152, 0, 0.1);
+}
+
+.nota-perfil-card.red { 
+  border-left: 5px solid #F44336; 
+  box-shadow: 0 4px 15px rgba(244, 67, 54, 0.1);
+}
+
+.nota-perfil-card.orange { 
+  border-left: 5px solid #FF5722; 
+  box-shadow: 0 4px 15px rgba(255, 87, 34, 0.1);
+}
+
+.nota-perfil-card.pink { 
+  border-left: 5px solid #E91E63; 
+  box-shadow: 0 4px 15px rgba(233, 30, 99, 0.1);
+}
+
+.nota-perfil-card.gray { 
+  border-left: 5px solid #9E9E9E; 
+  box-shadow: 0 4px 15px rgba(158, 158, 158, 0.1);
+}
+
+/* ====== MODAL DE NOTA COMPLETA ====== */
+.modal-nota-overlay {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-nota-contenido {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border-radius: 25px;
+  max-width: 700px;
+  width: 100%;
+  max-height: 85vh;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from { 
+    opacity: 0; 
+    transform: translateY(30px) scale(0.95); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0) scale(1); 
+  }
+}
+
+.modal-nota-header {
+  padding: 25px 30px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.modal-nota-header h2 {
+  color: #fff;
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  flex: 1;
+  margin-right: 15px;
+}
+
+.modal-nota-cerrar {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+}
+
+.modal-nota-cerrar:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
+}
+
+.modal-nota-body {
+  padding: 30px;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.7;
+  font-size: 16px;
+  max-height: 450px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(123, 0, 230, 0.5) transparent;
+}
+
+.modal-nota-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal-nota-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.modal-nota-body::-webkit-scrollbar-thumb {
+  background: rgba(123, 0, 230, 0.5);
+  border-radius: 3px;
+}
+
+.modal-nota-body::-webkit-scrollbar-thumb:hover {
+  background: rgba(123, 0, 230, 0.7);
+}
+
+.modal-nota-footer {
+  padding: 20px 30px 25px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.modal-nota-footer small {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.btn-editar-nota {
+  background: linear-gradient(135deg, rgba(123, 0, 230, 0.8), rgba(156, 77, 255, 0.8));
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-editar-nota:hover {
+  background: linear-gradient(135deg, rgba(123, 0, 230, 1), rgba(156, 77, 255, 1));
+  transform: scale(1.05);
+  text-decoration: none;
+  color: white;
+  box-shadow: 0 5px 15px rgba(123, 0, 230, 0.4);
+}
+
+/* ====== ESTADOS DE ERROR ====== */
+.error-notas {
+  text-align: center;
+  padding: 40px 20px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.error-notas i {
+  font-size: 48px;
+  color: #ff6b6b;
+  margin-bottom: 15px;
+}
+
+.error-notas h3 {
+  color: #fff;
+  margin-bottom: 10px;
+  font-size: 20px;
+}
+
+.error-notas p {
+  margin-bottom: 20px;
+  font-size: 16px;
+}
+
+.btn-reintentar {
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 25px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-reintentar:hover {
+  background: linear-gradient(135deg, #ff5252, #ff7979);
+  transform: scale(1.05);
+  box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+}
+
+/* ====== RESPONSIVE DESIGN ====== */
+@media (max-width: 1024px) {
+  .notas-perfil-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .notas-perfil-header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+    padding: 15px;
+  }
+  
+  .notas-stats {
+    justify-content: center;
+    gap: 10px;
+  }
+  
+  .stat-item {
+    font-size: 11px;
+    padding: 5px 10px;
+  }
+  
+  .notas-perfil-grid {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+  
+  .nota-perfil-card {
+    min-height: 180px;
+    padding: 20px;
+  }
+  
+  .nota-perfil-titulo {
+    font-size: 16px;
+  }
+  
+  .modal-nota-contenido {
+    margin: 10px;
+    max-height: 90vh;
+  }
+  
+  .modal-nota-header {
+    padding: 20px;
+  }
+  
+  .modal-nota-header h2 {
+    font-size: 20px;
+  }
+  
+  .modal-nota-body {
+    padding: 20px;
+    font-size: 15px;
+  }
+  
+  .modal-nota-footer {
+    padding: 15px 20px;
+    flex-direction: column;
+    gap: 15px;
+    align-items: stretch;
+  }
+  
+  .btn-editar-nota {
+    text-align: center;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .notas-perfil-header {
+    padding: 12px;
+  }
+  
+  .notas-stats {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .stat-item {
+    text-align: center;
+    font-size: 10px;
+    padding: 4px 8px;
+  }
+  
+  .filtro-select {
+    padding: 8px 12px;
+    font-size: 13px;
+  }
+  
+  .nota-perfil-card {
+    padding: 15px;
+    min-height: 160px;
+  }
+  
+  .nota-perfil-titulo {
+    font-size: 15px;
+  }
+  
+  .nota-perfil-contenido {
+    font-size: 13px;
+    -webkit-line-clamp: 3;
+  }
+  
+  .btn-ver-nota-completa {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+  
+  .btn-crear-nota {
+    padding: 12px 20px;
+    font-size: 14px;
+  }
+}
+
+/* ====== ANIMACIONES ADICIONALES ====== */
+@keyframes pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.7; }
+  100% { opacity: 1; }
+}
+
+.loading .nota-perfil-card {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+/* ====== MODO OSCURO (SI APLICA) ====== */
+.dark-mode .filtro-select {
+  background: rgba(30, 30, 30, 0.9);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .stat-item {
+  background: rgba(123, 0, 230, 0.2);
+  color: #b794f6;
+}
+
+.dark-mode .btn-reintentar {
+  background: linear-gradient(135deg, #e53e3e, #fc8181);
+}
+
+.dark-mode .btn-reintentar:hover {
+  background: linear-gradient(135deg, #c53030, #f56565);
+}
+
+/* ====== EFECTOS ESPECIALES ====== */
+.nota-perfil-card.destacada {
+  border: 2px solid rgba(123, 0, 230, 0.5);
+  background: linear-gradient(135deg, rgba(123, 0, 230, 0.1), rgba(156, 77, 255, 0.05));
+}
+
+.nota-perfil-card.reciente {
+  position: relative;
+}
+
+.nota-perfil-card.reciente::after {
+  content: 'Nuevo';
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}

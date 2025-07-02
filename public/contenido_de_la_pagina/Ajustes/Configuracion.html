@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/CSS_General/Settings.css">
+    <title>Configuración</title>
+
+</head>
+<body id="config_body">
+    <div id="config_container" class="config_container">
+        <h2>Configuración</h2>
+
+        <div class="config">
+            <div class="config_item" id="toggle-theme">
+                <span>🌗</span>
+                <p>Tema: <span id="theme-status">Claro</span></p>
+            </div>
+            <div class="config_item" id="security-btn">
+                <span>🔒</span>
+                <p>Seguridad</p>
+            </div>
+            <div class="config_item">
+                <span>🔔</span>
+                <p>Notificaciones</p>
+            </div>
+            <div class="config_item" id="privacy-btn">
+                <span>📜</span>
+                <p>Políticas de privacidad</p>
+            </div>
+            <div class="config_item" id="terms-btn">
+                <span>🛡️</span>
+                <p>Términos y condiciones</p>
+            </div>
+            <div class="config_item" id="about-btn">
+                <span>ℹ️</span>
+                <p>Acerca de</p>
+            </div>
+            <div class="config_item danger">
+                <span>🚫</span>
+                <p>Usuarios bloqueados</p>
+            </div>
+            <div class="config_item danger" id="deactivate-btn">
+                <span>⏸️</span>
+                <p>Desactivar cuenta</p>
+            </div>
+            <div class="config_item danger" id="delete-btn">
+                <span>🗑️</span>
+                <p>Eliminar cuenta</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALES -->
+    <div id="security-modal" class="cambio_modal">
+        <div class="modal-content">
+            <span class="close-btn" data-modal="security-modal">✖</span>
+            <h2>Seguridad</h2>
+            <div class="modal-text">
+                <p><strong>Protección de tu cuenta:</strong></p>
+                <p>• Tu información está encriptada de extremo a extremo</p>
+                <p>• Utilizamos protocolos de seguridad SSL/TLS</p>
+                <p>• Recomendamos usar contraseñas seguras</p>
+                <p>• Revisa regularmente tu actividad de cuenta</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="privacy-modal" class="cambio_modal">
+        <div class="modal-content">
+            <span class="close-btn" data-modal="privacy-modal">✖</span>
+            <h2>Políticas de Privacidad</h2>
+            <div class="modal-text">
+                <p><strong>Healthy Mind - Política de Privacidad</strong></p>
+                <p>Recopilamos información mínima necesaria para brindarte el mejor servicio.</p>
+                <p><strong>Información que recopilamos:</strong></p>
+                <p>• Datos de registro (email, nombre de usuario)</p>
+                <p>• Mensajes de chat para mejorar el servicio</p>
+                <p>• Datos de uso para optimizar la experiencia</p>
+                <p><strong>No compartimos</strong> tu información personal con terceros sin tu consentimiento.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="terms-modal" class="cambio_modal">
+        <div class="modal-content scrollable">
+            <span class="close-btn" data-modal="terms-modal">✖</span>
+            <h2>Términos y Condiciones</h2>
+            <div class="modal-text">
+                <h3>Términos y Condiciones de Healthy Mind<br>31 de marzo de 2025</h3>
+                
+                <h4>1. Aceptación de los términos:</h4>
+                <p>Al acceder o usar la aplicación Healthy Mind (en adelante, "la App"), usted acepta cumplir con estos Términos y Condiciones. Si no está de acuerdo con alguna de las condiciones aquí establecidas, le recomendamos no utilizar la App.</p>
+                
+                <h4>2. Descripción de la aplicación:</h4>
+                <p>Healthy Mind es una aplicación diseñada para brindar apoyo emocional a los usuarios a través de interacciones con otros usuarios, terapeutas certificados y voluntarios entrenados, así como herramientas de autoayuda y bienestar mental. La App proporciona acceso a chats para facilitar el soporte emocional.</p>
+                
+                <h4>3. Requisitos de uso:</h4>
+                <p>Para usar Healthy Mind, debe ser mayor de edad o tener el consentimiento de un tutor legal. Los usuarios deben registrarse con información precisa y actualizada, y se comprometen a mantener la confidencialidad de su cuenta y contraseña.</p>
+                
+                <h4>4. Uso de los servicios:</h4>
+                <p>La App proporciona diversos servicios que incluyen, pero no se limitan a, interacciones con terapeutas y voluntarios, acceso a contenido educativo y herramientas de autoayuda. Al usar los servicios, usted se compromete a hacerlo de manera respetuosa y conforme a las normas de la comunidad.</p>
+                
+                <h4>5. Política de privacidad:</h4>
+                <p>Su privacidad es importante para nosotros. Puede consultar nuestra Política de Privacidad para comprender cómo recopilamos, usamos y protegemos su información personal.</p>
+                
+                <h4>6. Responsabilidad de los terapeutas y voluntarios:</h4>
+                <p>Healthy Mind se esfuerza por proporcionar profesionales cualificados para ayudar a los usuarios. Sin embargo, la App no se hace responsable de los consejos proporcionados por los terapeutas y/o voluntarios. El uso de los servicios de la App no sustituye una consulta médica o psicológica profesional.</p>
+                
+                <h4>7. Limitaciones de responsabilidad:</h4>
+                <p>La App y sus servicios se proporcionan "tal cual" y "según disponibilidad". Healthy Mind no garantiza que el servicio sea ininterrumpido o libre de errores. No nos hacemos responsables de ningún daño directo, indirecto, incidental o consecuente derivado del uso de la App.</p>
+                
+                <h4>8. Prohibiciones - Los usuarios no deben utilizar Healthy Mind para:</h4>
+                <ul>
+                    <li>Realizar actividades ilegales o fraudulentas.</li>
+                    <li>Publicar contenido que infrinja los derechos de propiedad intelectual o sea difamatorio, obsceno o perjudicial para otros usuarios.</li>
+                    <li>Hacer spam o enviar mensajes no solicitados.</li>
+                    <li>Suplantamiento de identidad.</li>
+                </ul>
+                
+                <h4>9. Cancelación de cuentas:</h4>
+                <p>Healthy Mind se reserva el derecho de suspender o cancelar cuentas de usuarios que violen estos Términos y Condiciones. Los usuarios también podrán cancelar su cuenta en el momento que desee, desde la configuración de la App.</p>
+                
+                <h4>10. Modificación de los términos y condiciones:</h4>
+                <p>Healthy Mind se reserva el derecho de modificar estos Términos y Condiciones en cualquier momento. Las modificaciones entrarán en vigor una vez que se publiquen en la App. Le recomendamos revisar periódicamente los Términos y Condiciones.</p>
+                
+                <h4>11. Ley aplicable y jurisdicción:</h4>
+                <p>Estos Términos y Condiciones se regirán e interpretarán de acuerdo con las leyes de Colombia. Cualquier disputa relacionada con estos términos será resuelta en los tribunales competentes de Colombia.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="about-modal" class="cambio_modal">
+        <div class="modal-content">
+            <span class="close-btn" data-modal="about-modal">✖</span>
+            <h2>Acerca de Healthy Mind</h2>
+            <div class="modal-text">
+                <p><strong>Versión:</strong> 1.0.0</p>
+                <p><strong>Desarrollado por:</strong> Equipo Healthy Mind</p>
+                <p><strong>Misión:</strong> Proporcionar apoyo emocional accesible y de calidad para mejorar el bienestar mental de nuestros usuarios.</p>
+                <p><strong>Contacto:</strong> support@healthymind.com</p>
+                <p><strong>© 2025 Healthy Mind.</strong> Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </div>
+
+  <!-- MODAL DESACTIVAR CUENTA - Versión mejorada -->
+    <div id="deactivate-modal" class="cambio_modal">
+        <div class="modal-content">
+            <span class="close-btn" data-modal="deactivate-modal">✖</span>
+            <h2>Desactivar cuenta</h2>
+            <div class="modal-text">
+                <p><strong>¿Estás seguro de que quieres desactivar tu cuenta?</strong></p>
+                <p>Al desactivar tu cuenta:</p>
+                <p>• Tu perfil no será visible para otros usuarios</p>
+                <p>• No podrás acceder a los chats</p>
+                <p>• Podrás reactivarla más tarde iniciando sesión</p>
+                <p>• Tus datos se mantendrán guardados</p>
+                <p style="color: #ffa500; font-size: 14px;">💡 <strong>Nota:</strong> Esta acción es reversible</p>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="cancel-btn" style="flex: 1; padding: 10px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 5px;">Cancelar</button>
+                    <button class="confirm-deactivate-btn" style="flex: 1; padding: 10px; background: #ff9500; color: white; border: none; cursor: pointer; border-radius: 5px;">Desactivar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ELIMINAR CUENTA - Versión mejorada -->
+    <div id="delete-modal" class="cambio_modal">
+        <div class="modal-content">
+            <span class="close-btn" data-modal="delete-modal">✖</span>
+            <h2 style="color: #ff4d6d;">⚠️ Eliminar cuenta</h2>
+            <div class="modal-text">
+                <p><strong>¿Estás seguro de que quieres eliminar permanentemente tu cuenta?</strong></p>
+                <div style="background: #ffe6e6; padding: 15px; border-left: 4px solid #ff4d6d; margin: 15px 0; border-radius: 4px;">
+                    <p style="color: #ff4d6d; margin: 0;"><strong>⚠️ ADVERTENCIA: Esta acción NO se puede deshacer</strong></p>
+                </div>
+                <p><strong>Al eliminar tu cuenta se borrarán PERMANENTEMENTE:</strong></p>
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                    <p style="margin: 5px 0;">🗑️ Todos tus datos personales</p>
+                    <p style="margin: 5px 0;">💬 Todos tus mensajes y chats</p>
+                    <p style="margin: 5px 0;">📝 Todos tus comentarios y respuestas</p>
+                    <p style="margin: 5px 0;">⚙️ Todas tus configuraciones</p>
+                    <p style="margin: 5px 0;">📊 Todas tus estadísticas</p>
+                </div>
+                <p style="color: #dc3545; font-weight: bold;">No podrás recuperar esta información nunca más.</p>
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="cancel-btn" style="flex: 1; padding: 12px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 5px; font-weight: bold;">Cancelar</button>
+                    <button class="confirm-delete-btn" style="flex: 1; padding: 12px; background: #dc3545; color: white; border: none; cursor: pointer; border-radius: 5px; font-weight: bold;">Eliminar definitivamente</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script defer src="/Java/Configuracion.js"></script>
+        <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Configuración de Firebase -->
+  <script src="/Java/Base_de_datos_js/firebase-config.js"></script>
+
+  <!-- Auth Guard para manejo de sesiones -->
+  <script src="/Java/Base_de_datos_js/auth-guard.js"></script>
+</body>
+</html>

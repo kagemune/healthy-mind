@@ -1,0 +1,10 @@
+bof, hasta ahora se me ocurrio esta mamada, aqui podriamos anotar lo que se ha movido JSAFDJJSD, mas facil de encontrar 
+
+01/07/25 12:09 a.m (fecha)
+Juan (N): movi: - mi_perfil. ahora guarda la foto que haya en la pagina principal
+                - cree un nuevo archivo "Perfil_publico" ubicado en: "/contenido_de_la_pagina/Perfil_publico" con sus respectivos css y javascript
+                - edite el archivo de "/java/pagina_principal_Coemntarios_Beta.js" para que dejara clickear las fotos de los comentarios y lo 
+                redirigiera para el perfil del publicador, tambien modifique un poco los estilos de la pagina principal, agregue un hover en el perfil
+                del comentario
+                -tambien movi el inicio de sesión para que funcionase la opcion de olvide mi contraseña
+                

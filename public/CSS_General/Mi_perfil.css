@@ -1,0 +1,613 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins&display=swap');
+/* Variables de colores */
+:root {
+    --gradient-primary:url('/Imagenes/imagenes/floresmiperfil2.jpg');
+    --gradient-secondary: linear-gradient(135deg, #c587ff 0%, #d791ff 100%);
+    --color-white: linear-gradient(135deg, #e5b8ff 0%, #e5c6f5 30%, #d4b3f7 70%, #c299eb 100%);
+    --color-text: #000000;
+    --color-text-light: #666666;
+    --color-border: #c28bf8;
+    --color-shadow: rgba(0, 0, 0, 0.1);
+    --color-success: #28a745;
+    --color-online: #20c997;
+    --color-offline: #6c757d;
+}
+/* Reset y estilos base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins';
+    background: var(--gradient-primary);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    color: var(--color-text);
+}
+
+/* Header */
+.perfil-header {
+    background: var(--color-white);
+    padding: 1rem 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 10px var(--color-shadow);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.btn-volver, .btn-editar {
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-volver {
+    color: var(--color-text);
+    background: var(--color-border);
+}
+
+.btn-volver:hover {
+    background: #a2c7ff;
+    transform: translateX(-2px);
+}
+
+.btn-editar {
+    background: var(--gradient-primary);
+    color: var(--color-white);
+}
+
+.btn-editar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px var(--color-shadow);
+}
+
+.perfil-titulo {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-text);
+}
+
+/* Contenedor principal */
+.perfil-contenedor {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+/* Información del perfil */
+.perfil-info {
+    background: var(--color-white);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 25px var(--color-shadow);
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.perfil-avatar-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.perfil-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid transparent;
+    background: var(--gradient-primary);
+    padding: 4px;
+}
+
+.perfil-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.status-indicator {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid var(--color-white);
+}
+
+.status-indicator.online {
+    background-color: var(--color-online);
+}
+
+.status-indicator.offline {
+    background-color: var(--color-offline);
+}
+
+.perfil-datos {
+    flex: 1;
+}
+
+.perfil-nombre {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--color-text);
+}
+.perfil-fecha-registro {
+    color: var(--color-text-light);
+    font-size: 0.9rem;
+}
+
+/* Estadísticas */
+.perfil-estadisticas {
+    background: var(--color-white);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 25px var(--color-shadow);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1.5rem;
+}
+
+.estadistica-item {
+    text-align: center;
+    padding: 1rem;
+    border-radius: 15px;
+    background: var(--gradient-secondary);
+    color: var(--color-white);
+    transition: transform 0.3s ease;
+}
+
+.estadistica-item:hover {
+    transform: translateY(-5px);
+}
+
+.estadistica-numero {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.estadistica-label {
+    font-size: 0.9rem;
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+/* Pestañas */
+.perfil-tabs {
+    background: var(--color-white);
+    border-radius: 20px;
+    padding: 1rem;
+    box-shadow: 0 8px 25px var(--color-shadow);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.5rem;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 1rem;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 500;
+    color: var(--color-text-light);
+}
+
+.tab-btn i {
+    font-size: 1.2rem;
+}
+
+.tab-btn.active {
+    background: var(--gradient-secondary);
+    color: var(--color-white);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px var(--color-shadow);
+}
+
+.tab-btn:hover:not(.active) {
+    background: var(--color-border);
+    transform: translateY(-2px);
+}
+
+/* Contenido de pestañas */
+.perfil-contenido {
+    background: var(--color-white);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 25px var(--color-shadow);
+    min-height: 300px;
+}
+
+.tab-content {
+    display: none;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.contenido-vacio {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--color-text-light);
+}
+
+.contenido-vacio i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.contenido-vacio h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: var(--color-text);
+}
+
+/* Modal de edición */
+.modal-editar {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+}
+
+.modal-editar-contenido {
+    background: var(--color-white);
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 20px 40px var(--color-shadow);
+    animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: var(--gradient-primary);
+    color: var(--color-white);
+    border-radius: 20px 20px 0 0;
+}
+
+.modal-header h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.cerrar-modal {
+    font-size: 2rem;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+.cerrar-modal:hover {
+    opacity: 1;
+}
+
+.formulario-editar {
+    padding: 2rem;
+}
+
+.campo-grupo {
+    margin-bottom: 1.5rem;
+}
+
+.campo-grupo label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--color-text);
+}
+
+.campo-grupo input,
+.campo-grupo textarea {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--color-border);
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    font-family: inherit;
+}
+
+.campo-grupo input:focus,
+.campo-grupo textarea:focus {
+    outline: none;
+    border-color: #8ec5fc;
+    box-shadow: 0 0 0 3px rgba(142, 197, 252, 0.1);
+}
+
+.botones-modal {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+}
+
+.btn-cancelar,
+.btn-guardar {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-cancelar {
+    background: var(--color-border);
+    color: var(--color-text);
+}
+
+.btn-cancelar:hover {
+    background: #d1d5db;
+}
+
+.btn-guardar {
+    background: var(--gradient-primary);
+    color: var(--color-white);
+}
+
+.btn-guardar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px var(--color-shadow);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .perfil-info {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+    
+    .perfil-estadisticas {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .perfil-tabs {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .tab-btn {
+        font-size: 0.9rem;
+        padding: 0.75rem;
+    }
+    
+    .perfil-nombre {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .perfil-contenedor {
+        padding: 1rem 0.5rem;
+    }
+    
+    .perfil-info,
+    .perfil-estadisticas,
+    .perfil-tabs,
+    .perfil-contenido {
+        padding: 1.5rem;
+    }
+    
+    .modal-editar-contenido {
+        width: 95%;
+        margin: 10% auto;
+    }
+}
+
+/* Variables de modo oscuro */
+.dark-mode {
+    --gradient-primary: linear-gradient(135deg, #580775 0%, #242222 50%, #000d7e 100%);
+    --gradient-secondary: linear-gradient(135deg, #3a3a3a 0%, #2a2a2a 100%);
+    --color-white: #1e1e1e;
+    --color-text: #ffffff;
+    --color-text-light: #b0b0b0;
+    --color-border: #404040;
+    --color-shadow: rgba(0, 0, 0, 0.4);
+    --color-success: #4ade80;
+    --color-online: #22d3ee;
+    --color-offline: #9ca3af;
+}
+
+/* Body en modo oscuro */
+.dark-mode body {
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 50%, #0f0f0f 100%);
+}
+
+/* Header */
+.dark-mode .perfil-header {
+    background: #1e1e1e;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+}
+
+.dark-mode .btn-volver {
+    background: #404040;
+    color: #ffffff;
+}
+
+.dark-mode .btn-volver:hover {
+    background: #525252;
+}
+
+.dark-mode .btn-editar {
+    background: linear-gradient(135deg, #353434 0%, #2d2d2d 50%, #1a1a1a 100%);
+    color: #ffffff;
+}
+
+.dark-mode .perfil-titulo {
+    color: #ffffff;
+}
+
+/* Información del perfil */
+.dark-mode .perfil-info {
+    background: #1e1e1e;
+    border: 1px solid #404040;
+}
+
+.dark-mode .perfil-avatar {
+    background: linear-gradient(135deg, #9653af 0%, #0435a0 10%, #1b0046 100%);
+}
+
+.dark-mode .perfil-nombre {
+    color: #ffffff;
+}
+
+.dark-mode .perfil-fecha-registro {
+    color: #b0b0b0;
+}
+
+.dark-mode .status-indicator {
+    border: 2px solid #1e1e1e;
+}
+
+/* Estadísticas */
+.dark-mode .perfil-estadisticas {
+    background: #1e1e1e;
+    border: 1px solid #404040;
+}
+
+.dark-mode .estadistica-item {
+    background: linear-gradient(135deg, #4a4a4a 0%, #2d2d2d 50%, #1a1a1a 100%);
+}
+.dark-mode .estadistica-numero {
+    color: #ffffff;
+}
+.dark-mode .estadistica-label {
+    color: #ffffff;
+}
+/* Pestañas */
+.dark-mode .perfil-tabs {
+    background: #1e1e1e;
+    border: 1px solid #404040;
+}
+
+.dark-mode .tab-btn {
+    color: #b0b0b0;
+}
+
+.dark-mode .tab-btn.active {
+    background: linear-gradient(135deg, #4a4a4a 0%, #2d2d2d 50%, #1a1a1a 100%);
+    color: #ffffff;
+}
+
+.dark-mode .tab-btn:hover:not(.active) {
+    background: #404040;
+}
+
+/* Contenido de pestañas */
+.dark-mode .perfil-contenido {
+    background: #1e1e1e;
+    border: 1px solid #404040;
+}
+
+.dark-mode .contenido-vacio {
+    color: #b0b0b0;
+}
+
+.dark-mode .contenido-vacio h3 {
+    color: #ffffff;
+}
+
+/* Modal de edición */
+.dark-mode .modal-editar {
+    background-color: rgba(0, 0, 0, 0.8);
+}
+
+.dark-mode .modal-editar-contenido {
+    background: #1e1e1e;
+    border: 1px solid #404040;
+}
+
+.dark-mode .modal-header  {
+    background: linear-gradient(135deg, #4a4a4a 0%, #2d2d2d 50%, #1a1a1a 100%);
+    border-bottom: 1px solid #404040;
+}
+
+.dark-mode .modal-header h3 {
+    color: #ffffff;
+}
+
+.dark-mode .formulario-editar {
+    background: #1e1e1e;
+}
+
+.dark-mode .campo-grupo label {
+    color: #ffffff;
+}
+
+.dark-mode .campo-grupo input,
+.dark-mode .campo-grupo textarea {
+    background: #2a2a2a;
+    border: 2px solid #404040;
+    color: #ffffff;
+}
+
+.dark-mode .campo-grupo input:focus,
+.dark-mode .campo-grupo textarea:focus {
+    border-color: #666666;
+    box-shadow: 0 0 0 3px rgba(102, 102, 102, 0.1);
+}
+
+.dark-mode .btn-cancelar {
+    background: #404040;
+    color: #ffffff;
+}
+
+.dark-mode .btn-cancelar:hover {
+    background: #525252;
+}
+
+.dark-mode .btn-guardar {
+    background: linear-gradient(135deg, #4a4a4a 0%, #2d2d2d 50%, #1a1a1a 100%);
+    color: #ffffff;
+}

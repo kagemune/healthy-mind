@@ -1,0 +1,891 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background: url('/Imagenes/imagenes/Atardecer_en_el_Lago_Serpenteante.png') no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+
+.wrapper {
+    width: 420px;
+    color: white;
+    padding: 30px 40px;
+    border-radius: 20px;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, .2);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 10px rgba(0, 0, 0, .2);
+}
+
+.wrapper h1 {
+    text-align: center;
+    font-size: 30px;
+    margin-bottom: 20px;
+}
+
+.wrapper img {
+    width: 100px;
+    height: 70px;
+    display: block;
+    margin: 0 auto;
+}
+
+.wrapper .input-box {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    margin: 20px 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease;
+}
+
+/* Estado visible normal */
+.input-box {
+    max-height: 50px;
+    opacity: 1;
+    margin: 20px 0;
+}
+
+/* Estado oculto */
+.input-box.hidden {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+.input-box input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    border: 2px solid rgba(255, 255, 255, .2);
+    border-radius: 40px;
+    font-size: 16px;
+    color: #fff;
+    padding: 20px 40px 20px 20px;
+}
+
+.input-box input::placeholder {
+    color: #fff;
+}
+
+.input-box i {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+}
+
+.wrapper .recuerdame-olvide {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14.5px;
+    margin: 10px 0 15px;
+}
+
+.recuerdame-olvide label input {
+    accent-color: #fff;
+    margin-right: 3px;
+}
+
+.recuerdame-olvide a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.recuerdame-olvide a:hover {
+    text-decoration: underline;
+    color: aqua;
+}
+
+/*Términos y condiciones*/
+.terms {
+    font-size: 14.5px;
+    margin: 10px 0;
+    transition: max-height 0.5s ease, opacity 0.5s ease;
+    max-height: 50px;
+    opacity: 1;
+    overflow: hidden;
+}
+
+.terms.hidden {
+    max-height: 0;
+    opacity: 0;
+    margin: 0;
+}
+
+.terms a {
+    color: #fff;
+    text-decoration: none;
+}
+
+.terms a:hover {
+    text-decoration: underline;
+    color: aqua;
+}
+
+.terms input {
+    accent-color: #fff;
+    margin-right: 3px;
+}
+
+.wrapper .btn {
+    width: 100%;
+    height: 45px;
+    background-color: #fff;
+    border: none;
+    outline: none;
+    border-radius: 40px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, .1);
+    cursor: pointer;
+    font-size: 16px;
+    color: #333;
+    font-weight: 600;
+    transition: background 0.5s, transform 0.3s;
+}
+
+.wrapper .btn:hover {
+    background-color: aqua;
+    color: #000000;
+    transform: scale(1.05);
+}
+
+.wrapper .buttons-box {
+    display: flex;
+    justify-content: space-between;
+    margin: 20px 0;
+}
+
+.wrapper .buttons-box button {
+    width: 40%;
+    padding: 15px 0;
+    border: none;
+    border-radius: 25px;
+    background-color: #ffffff;
+    color: #333;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background 0.5s, transform 0.3s;
+    font-weight: 600;
+}
+
+.wrapper .buttons-box button:hover {
+    background-color: aqua;
+    color: #000000;
+    transform: scale(1.05);
+}
+
+.wrapper .buttons-box button.disable {
+    background-color: #cccccc;
+    color: #666666;
+    cursor: default;
+    transform: none;
+}
+
+.wrapper .buttons-box p {
+    color: #fff;
+    margin-top: 10px;
+    font-size: 20px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+.buttons-box .btn_cancel{
+    color:#333;
+    text-decoration: none;
+}
+
+/* Terms and conditions modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.4s, visibility 0.4s;
+}
+
+.modal.active{
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content{
+    width: 80%;
+    max-width: 800px;
+    max-height: 80vh;
+    background-image: linear-gradient(135deg, #eca4e6 0%, #8bb0ff 50%, #b574e0 100%);
+    border-radius: 15px;
+    padding: 30px;
+    position: relative;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+    color: #fff;
+    transform: translateY(-50px);
+    transition: transform 0.4s ease-out;
+    overflow-y: auto;
+}
+
+.modal.active  {
+    transform: translateY(0);
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 22px;
+    color: #fff;
+    cursor: pointer;
+    background: none;
+    border: none;
+    outline: none;
+    transition: all 0.3s;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.modal-close:hover {
+    color: #fff;
+    transform: scale(1.2);
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+    color: #fff;
+    font-weight: 700;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.3);
+    padding-top: 20px;
+    margin-top: 25px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.modal-accept{
+    padding: 12px 30px;
+    background-color: rgba(255, 255, 255, 0.25);
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: 25px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(5px);
+}
+
+.modal-accept:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(142, 197, 252, 0.5);
+}
+
+.modal-accept:active {
+    transform: translateY(1px);
+}
+
+.terms-conten {
+    line-height: 1.7;
+    color: #fff;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+.terms-content h3 {
+    margin-top: 24px;
+    margin-bottom: 12px;
+    color: #fff;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.terms-content p {
+    margin-bottom: 16px;
+}
+
+.terms-content ul {
+    margin-left: 20px;
+    margin-bottom: 16px;
+}
+
+.terms-content ul li {
+    margin-bottom: 8px;
+    position: relative;
+}
+
+.terms-content ul li:before {
+    content: "•";
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: bold;
+    display: inline-block;
+    width: 1em;
+    margin-left: -1em;
+}
+
+/* Gradient backdrop animation variant (optional) */
+@keyframes gradientBG {
+    0% {background-position: 0% 50%;}
+    50% {background-position: 100% 50%;}
+    100% {background-position: 0% 50%;}
+}
+
+.modal-avatar-contenido {
+    background-image: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 50%, #b8a0e9 100%);
+    margin: 20% auto;
+    padding: 30px;
+    border-radius: 15px;
+    width: 80%;
+    max-width: 800px;
+    max-height: 80vh;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    overflow-y: auto;
+    box-sizing: border-box;
+}
+
+/* Algunas opciones de recuperar contraseña */
+/* ====== ESTILOS PARA MODAL DE RECUPERACIÓN DE CONTRASEÑA ====== */
+/* Agregar al final de Inicio_de_sesion.css */
+
+/* Modal de recuperación */
+.modal-recuperacion {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-recuperacion-contenido {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 20px;
+    padding: 0;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    animation: modalSlideIn 0.3s ease-out;
+    overflow: hidden;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.modal-recuperacion-header {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.modal-recuperacion-header h3 {
+    color: white;
+    margin: 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.cerrar-modal {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.cerrar-modal:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(90deg);
+}
+
+.modal-recuperacion-body {
+    padding: 25px;
+    background: white;
+}
+
+.descripcion-recuperacion {
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.formulario-recuperacion {
+    margin-bottom: 20px;
+}
+
+.campo-grupo {
+    margin-bottom: 20px;
+}
+
+.campo-grupo label {
+    display: block;
+    color: #333;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+/* Reutilizar estilos de input-box existentes */
+.formulario-recuperacion .input-box {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    margin-bottom: 0;
+}
+
+.formulario-recuperacion .input-box input {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    outline: none;
+    border-radius: 40px;
+    font-size: 16px;
+    color: #333;
+    padding: 20px 45px 20px 20px;
+    transition: all 0.3s ease;
+}
+
+.formulario-recuperacion .input-box input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 10px rgba(102, 126, 234, 0.3);
+}
+
+.formulario-recuperacion .input-box i {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 20px;
+    color: #667eea;
+}
+
+.botones-recuperacion {
+    display: flex;
+    gap: 15px;
+    justify-content: flex-end;
+    margin-top: 25px;
+}
+
+.btn-cancelar,
+.btn-recuperar {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 25px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.btn-cancelar {
+    background: #f8f9fa;
+    color: #6c757d;
+    border: 2px solid #dee2e6;
+}
+
+.btn-cancelar:hover {
+    background: #e9ecef;
+    border-color: #adb5bd;
+}
+
+.btn-recuperar {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-recuperar:hover:not(:disabled) {
+    background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-recuperar:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.icono-carga {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.info-adicional {
+    background: #f8f9fa;
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 4px solid #667eea;
+}
+
+.info-adicional small {
+    color: #6c757d;
+    line-height: 1.4;
+}
+
+/* Mensajes de recuperación */
+.mensaje-recuperacion {
+    margin-bottom: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+    animation: messageSlideIn 0.3s ease-out;
+}
+
+@keyframes messageSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.mensaje-contenido {
+    padding: 15px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.mensaje-icono {
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.mensaje-texto {
+    flex: 1;
+    font-weight: 500;
+}
+
+.mensaje-cerrar {
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    width: 25px;
+    height: 25px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: background 0.3s ease;
+}
+
+.mensaje-cerrar:hover {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.mensaje-success {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.mensaje-error {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.mensaje-warning {
+    background: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeaa7;
+}
+
+.mensaje-info {
+    background: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .modal-recuperacion-contenido {
+        width: 95%;
+        margin: 20px;
+    }
+    
+    .modal-recuperacion-body {
+        padding: 20px;
+    }
+    
+    .botones-recuperacion {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn-cancelar,
+    .btn-recuperar {
+        width: 100%;
+    }
+}
+
+/*Modo oscuro*/
+/* Dark Mode Styling */
+body.dark-mode {
+    background-image: url('/Imagenes/imagenes/banner-de-hoja-de-monstera-tropical-neon.jpg');
+}
+
+.dark-mode .wrapper {
+    background: rgba(18, 18, 18, 0.8);
+    border: 2px solid rgba(100, 100, 100, 0.2);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+    color: #e0e0e0;
+}
+
+.dark-mode .wrapper h1 {
+    color: #e0e0e0;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .input-box input {
+    border: 2px solid rgba(100, 100, 100, 0.3);
+    color: #e0e0e0;
+}
+
+.dark-mode .input-box input::placeholder {
+    color: #aaaaaa;
+}
+
+.dark-mode .input-box i {
+    color: #aaaaaa;
+}
+
+.dark-mode .recuerdame-olvide {
+    color: #cccccc;
+}
+
+.dark-mode .recuerdame-olvide a {
+    color: #ffffff;
+}
+
+.dark-mode .recuerdame-olvide a:hover {
+    color: #ffffff;
+}
+
+.dark-mode .terms {
+    color: #cccccc;
+}
+
+.dark-mode .terms a {
+    color: #ffffff;
+}
+
+.dark-mode .terms a:hover {
+    color: #ffffff;
+}
+
+.dark-mode .wrapper .btn {
+    background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+    color: #e0e0e0;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    border: 1px solid #333333;
+}
+
+.dark-mode .wrapper .btn:hover {
+    background: linear-gradient(135deg, #8ec5fc 0%, #e0c3fc 100%);
+    color: #121212;
+    border: none;
+}
+
+.dark-mode .wrapper .buttons-box button {
+    background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+    color: #e0e0e0;
+    border: 1px solid #333333;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .wrapper .buttons-box button:hover {
+    background: linear-gradient(135deg, #8ec5fc 0%, #e0c3fc 100%);
+    color: #121212;
+    border: none;
+}
+
+.dark-mode .wrapper .buttons-box button.disable {
+    background-color: #232323;
+    color: #555555;
+    border: 1px solid #2a2a2a;
+    box-shadow: none;
+}
+
+.dark-mode .wrapper .buttons-box p {
+    color: #e0e0e0;
+}
+
+.dark-mode .buttons-box .btn_cancel {
+    color: #e0e0e0;
+}
+
+/* Dark Mode Modal Styling */
+.dark-mode .modal {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+.dark-mode .modal-content {
+    background-image: linear-gradient(135deg, #232133 0%, #342381 50%, #ae4bff 100%);
+    border: 1px solid #333333;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.dark-mode .modal-close {
+    color: #e0e0e0;
+}
+
+.dark-mode .modal-close:hover {
+    color: #8ec5fc;
+}
+
+.dark-mode .modal-header {
+    border-bottom: 1px solid rgba(100, 100, 100, 0.3);
+    color: #e0e0e0;
+}
+
+.dark-mode .modal-footer {
+    border-top: 1px solid rgba(100, 100, 100, 0.3);
+}
+
+.dark-mode .modal-accept {
+    background-color: rgba(30, 30, 30, 0.6);
+    color: #e0e0e0;
+    border: 2px solid rgba(100, 100, 100, 0.5);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+}
+
+.dark-mode .modal-accept:hover {
+    background-color: rgba(142, 197, 252, 0.2);
+    border: 2px solid #8ec5fc;
+    color: #ffffff;
+}
+
+.dark-mode .terms-content {
+    color: #e0e0e0;
+}
+
+.dark-mode .terms-content h3 {
+    color: #8ec5fc;
+}
+
+.dark-mode .terms-content ul li:before {
+    color: #8ec5fc;
+}
+
+/* Custom scrollbar for dark mode */
+.dark-mode ::-webkit-scrollbar {
+    width: 8px;
+}
+
+.dark-mode ::-webkit-scrollbar-track {
+    background: #1a1a1a;
+    border-radius: 10px;
+}
+
+.dark-mode ::-webkit-scrollbar-thumb {
+    background: #333333;
+    border-radius: 10px;
+}
+
+.dark-mode ::-webkit-scrollbar-thumb:hover {
+    background: #444444;
+}
+
+/* recuperar contraseña */
+.dark-mode .modal-recuperacion-contenido {
+    background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+}
+
+.dark-mode .modal-recuperacion-body {
+    background: #1a202c;
+    color: #e2e8f0;
+}
+
+.dark-mode .descripcion-recuperacion {
+    color: #a0aec0;
+}
+
+.dark-mode .campo-grupo label {
+    color: #e2e8f0;
+}
+
+.dark-mode .formulario-recuperacion .input-box input {
+    color: #e2e8f0;
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.dark-mode .formulario-recuperacion .input-box input:focus {
+    border-color: #667eea;
+}
+
+.dark-mode .btn-cancelar {
+    background: #2d3748;
+    color: #e2e8f0;
+    border-color: #4a5568;
+}
+
+.dark-mode .btn-cancelar:hover {
+    background: #4a5568;
+}
+
+.dark-mode .info-adicional {
+    background: #2d3748;
+    border-left-color: #667eea;
+}
+
+.dark-mode .info-adicional small {
+    color: #a0aec0;
+}
