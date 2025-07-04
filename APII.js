@@ -235,7 +235,7 @@ process.on("SIGINT", () => {
   process.exit(0);
 });
 
-const PORT = process.env.PORT || 3000; // Heroku asigna el puerto dinámico
+const PORT = process.env.PORT || 5000; // Heroku asigna el puerto dinámico
 
 app.listen(PORT, "0.0.0.0", () => {
   console.log(
