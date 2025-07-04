@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthy Mind</title>
+    <link rel="icon" href="/Imagenes/logo2.ico">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="./CSS_General/GeneralComentariosBeta.css">
+
+    <!-- Fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
+</head>
+
+<body class="pagina_principal">
+    <!-- Header con navegación -->
+    <header>
+        <button class="abrirmenu" id="abrir">
+            <i class="bi bi-list"></i>
+        </button>
+
+        <nav class="barra" id="barra">
+            <button class="cerrarmenu" id="cerrar">
+                <i class="bi bi-x"></i>
+            </button>
+
+            <ul class="barralista">
+                <!-- Logo -->
+                <li>
+                    <img src="/Imagenes/logos/Healthy_mind_horizontal.png" alt="Logo" class="logo-inicio">
+                </li>
+
+                <!-- Avatar del usuario -->
+                <li>
+                    <a href="#" id="abrirModalAvatar">
+                        <img id="avatarSeleccionado" class="avatar-seleccionado" src="#" alt="Avatar">
+                    </a>
+                </li>
+
+                <!-- Enlaces de navegación -->
+                <li>
+                    <a href="/index.html">
+                        <i class="bi bi-house-door-fill icono"></i> Inicio
+                    </a>
+                </li>
+                <li>
+                    <a href="/contenido_de_la_pagina/Inicio_de_sesion/Inicio_de_sesion.html">
+                        <i class="bi bi-door-open-fill icono"></i> Iniciar sesión
+                    </a>
+                </li>
+                <li>
+                    <a href="/contenido_de_la_pagina/notas.hmtl/notas.html">
+                        <i class="bi bi-file-earmark-fill icono"></i> Notas
+                    </a>
+                </li>
+                <li>
+                    <a href="/contenido_de_la_pagina/Quienes_somos/quienes_somos.html">
+                        <i class="bi bi-question-circle-fill icono"></i> ¿Quiénes somos?
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="bi bi-gear-fill icono configuracion"></i> Notificaciones
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Menú de perfil -->
+    <div id="profileMenu" class="profile-menu">
+        <div class="profile-menu-contenido">
+            <span class="cerrar-profile" id="cerrarProfile">&times;</span>
+
+            <!-- Header del perfil -->
+            <div class="profile-header">
+                <img id="profileAvatarDisplay" class="profile-avatar-display" src="#" alt="Avatar">
+                <div class="profile-username">Usuario</div>
+                <div class="profile-status">En línea</div>
+            </div>
+
+            <!-- Opciones del menú de perfil -->
+            <div class="profile-menu-opciones">
+                <a href="#" class="profile-option" id="btnMiPerfil">
+                    <i class="bi bi-person-fill"></i>
+                    Mi perfil
+                </a>
+
+                <a href="#" class="profile-option" id="btnCambiarAvatar">
+                    <i class="bi bi-camera-fill"></i>
+                    Cambiar foto de perfil
+                </a>
+
+                <a href="#" class="profile-option" id="btnConfiguracion">
+                    <i class="bi bi-gear-fill"></i>
+                    Configuración
+                </a>
+
+                <a href="#" onclick="cerrarSesion(); return false;" class="logout-btn">
+                    <i class="bi bi-door-open-fill icono"></i>Cerrar Sesión
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal para selección de avatar -->
+    <div id="modalAvatar" class="modal-avatar">
+        <div class="modal-avatar-contenido">
+            <span class="cerrar-avatar" id="cerrarModalAvatar">&times;</span>
+            <h2>Selecciona tu imagen de perfil</h2>
+
+            <!-- Opciones de avatares -->
+            <div class="avatar-opciones">
+                <img src="/Imagenes/Avatares/Avatar1.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar1.jpg">
+                <img src="/Imagenes/Avatares/Avatar2.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar2.jpg">
+                <img src="/Imagenes/Avatares/Avatar3.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar3.jpg">
+                <img src="/Imagenes/Avatares/Avatar4.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar4.jpg">
+                <img src="/Imagenes/Avatares/Avatar5.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar5.jpg">
+                <img src="/Imagenes/Avatares/Avatar6.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar6.jpg">
+                <img src="/Imagenes/Avatares/Avatar7.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar7.jpg">
+                <img src="/Imagenes/Avatares/Avatar8.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar8.jpg">
+                <img src="/Imagenes/Avatares/Avatar9.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar9.jpg">
+                <img src="/Imagenes/Avatares/Avatar10.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar10.jpg">
+                <img src="/Imagenes/Avatares/Avatar11.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar11.jpg">
+                <img src="/Imagenes/Avatares/Avatar12.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar12.jpg">
+                <img src="/Imagenes/Avatares/Avatar13.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar13.jpg">
+                <img src="/Imagenes/Avatares/Avatar14.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar14.jpg">
+                <img src="/Imagenes/Avatares/Avatar15.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar15.jpg">
+                <img src="/Imagenes/Avatares/Avatar16.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar16.jpg">
+                <img src="/Imagenes/Avatares/Avatar17.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar17.jpg">
+                <img src="/Imagenes/Avatares/Avatar18.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar18.jpg">
+                <img src="/Imagenes/Avatares/Avatar19.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar19.jpg">
+                <img src="/Imagenes/Avatares/Avatar20.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar20.jpg">
+                <img src="/Imagenes/Avatares/Avatar21.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar21.jpg">
+                <img src="/Imagenes/Avatares/Avatar22.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar22.jpg">
+                <img src="/Imagenes/Avatares/Avatar23.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar23.jpg">
+                <img src="/Imagenes/Avatares/Avatar24.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar24.jpg">
+                <img src="/Imagenes/Avatares/Avatar25.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar25.jpg">
+                <img src="/Imagenes/Avatares/Avatar26.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar26.jpg">
+                <img src="/Imagenes/Avatares/Avatar27.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar27.jpg">
+                <img src="/Imagenes/Avatares/Avatar28.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar28.jpg">
+                <img src="/Imagenes/Avatares/Avatar29.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar29.jpg">
+                <img src="/Imagenes/Avatares/Avatar30.jpg" class="avatar-img"
+                    data-avatar="/Imagenes/Avatares/Avatar30.jpg">
+            </div>
+        </div>
+    </div>
+</body>
+<main>
+    <!-- comentarios -->
+    <div id="comentariosSection">
+        <div class="contenedor-comentario-y-posts">
+            <div class="caja_comentarios">
+                <h2>Publica tu comentario</h2>
+                <textarea placeholder="¿Qué estás sintiendo?" id="comentario"></textarea>
+                <button onclick="publicarComentario()">Publicar</button>
+            </div>
+
+            <div class="post-carrusel" id="postCarrusel">
+                <h3>Últimos posts</h3>
+                <button class="flecha-carrusel izquierda"><i class="bi bi-chevron-left"></i></button>
+                <div class="carrusel-contenedor-wrapper">
+                    <div class="carrusel-contenedor" id="carruselPosts">
+                        <!-- Aquí van los posts -->
+                    </div>
+                </div>
+                <button class="flecha-carrusel derecha"><i class="bi bi-chevron-right"></i></button>
+            </div>
+
+            <div class="lista_comentarios" id="lista_comentarios"></div>
+        </div>
+    </div>
+</main>
+
+<!-- Sección de comentarios, oculta hasta iniciar sesión -->
+
+<div class="post-amigos">
+    <h3>Ultimos post</h3>
+    <div id="ultimosPostsContainer"></div>
+    <div class="post">
+        <div class="post-header">
+            <div class="avatar"></div>
+            <span class="nombre">Nombre</span>
+        </div>
+        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit...</p>
+        <button class="ver-mas">Ver más</button>
+    </div>
+    <div class="post">
+        <div class="post-header">
+            <div class="avatar"></div>
+            <span class="nombre">Nombre</span>
+        </div>
+        <p>Otro mensaje de un amigo para mostrar contenido similar.</p>
+        <button class="ver-mas">Ver más</button>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="/Java/pagina_principal_Coemntarios_Beta.js"></script>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<!-- Configuración de Firebase -->
+<script src="/Java/Base_de_datos_js/firebase-config.js"></script>
+
+<!-- Auth Guard para manejo de sesiones -->
+<script src="/Java/Base_de_datos_js/auth-guard.js"></script>
+
+</body>
+
+</html>
