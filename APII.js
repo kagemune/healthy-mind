@@ -3,6 +3,14 @@ const cors = require("cors");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const path = require("path");
 require("dotenv").config();
+const admin = require("firebase-admin");
+
+admin.initializeApp({
+  credential: admin.credential.cert({
+    projectId: process.env.FIREBASE_PROJECT_ID,
+  }),
+  databaseURL: process.env.FIREBASE_DATABASE_URL,
+});
 
 const app = express();
 app.use(express.json());
