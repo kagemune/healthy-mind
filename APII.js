@@ -5,9 +5,17 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
+exports.app = app;
 app.use(express.json());
 app.use(cors());
 
+app.get('/Base_de_datos_js/firebase-config.js', (req, res) => {
+  res.json({
+    apiKey: process.env.PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.PUBLIC_FIREBASE_AUTH_DOMAIN,
+    // ... otras configs
+  });
+});
 // Servir archivos estáticos desde la carpeta actual
 app.use(express.static(path.join(__dirname, '')));
 

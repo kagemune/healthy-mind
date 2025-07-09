@@ -1,3 +1,5 @@
+const { app } = require("../APII");
+
 // Configuración de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCR2QOp1qGnPC9_EYbx_BJBZYhdiZknqKc",
