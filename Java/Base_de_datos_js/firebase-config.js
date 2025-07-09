@@ -1,4 +1,4 @@
-const { app } = require("../../APII");
+const { app } = require("../APII.js");
 
 // Configuración de Firebase
 const firebaseConfig = {
