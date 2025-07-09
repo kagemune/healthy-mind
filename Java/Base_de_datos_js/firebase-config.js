@@ -1,3 +1,5 @@
+const { app } = require("../APII");
+
 // Configuración de Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyCR2QOp1qGnPC9_EYbx_BJBZYhdiZknqKc",
@@ -11,6 +13,12 @@ const firebaseConfig = {
 
 // Inicializar Firebase
 firebase.initializeApp(firebaseConfig);
+
+if (!firebase.apps.length) {
+   firebase.initializeApp(firebaseConfig);
+ } else {
+   firebase.app(); // Si ya está inicializado, usa la instancia existente
+ }
 
 // Referencias a servicios
 const auth = firebase.auth();
