@@ -656,7 +656,7 @@ async function verificarComentario(texto) {
              
         try {
             console.log("Enviando petición a API:", texto);
-            const response = await fetch('http://localhost:5000/moderar', {
+            const response = await fetch('/moderar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contenido: texto })
@@ -724,7 +724,7 @@ async function verificarRespuesta(texto, boton, indicador, icono, textoIndicador
         textoIndicador.innerHTML = '<span class="loader"></span>Verificando contenido...';
         
         try {
-            const response = await fetch('http://localhost:5000/moderar', {
+            const response = await fetch('/moderar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contenido: texto })
