@@ -1,15 +1,17 @@
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("JavaScript conectado con exito.");
+    
     // Llamado de documentos
     const signUp = document.getElementById('signUp');
     const signIn = document.getElementById('signIn');
-    const nombreBox = document.getElementById('nombre');
+    const nombreBox = document.getElementById('nombre-box'); // CORREGIDO: Ahora usa el ID correcto
     const termsBox = document.getElementById('terms-box');
     const title = document.getElementById('titulo');
     const submitBtn = document.getElementById('submit-btn');
     const loginForm = document.getElementById('loginForm');
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
-    const nombreInput = document.querySelector('#nombre input');
+    const nombreInput = document.querySelector('#nombre'); // CORREGIDO: Selector más específico
     const rememberCheck = document.getElementById('remember');
 
     // Términos y condiciones
@@ -122,12 +124,17 @@ document.addEventListener('DOMContentLoaded', function() {
                     const user = userCredential.user;
                     return user.updateProfile({ displayName: nombre })
                         .then(() => {
+                            // 📧 NUEVO: Enviar email de verificación
+                            return enviarEmailVerificacionSeguro(user);
+                        })
+
+                        .then(() => {
                             // Guardar datos en Firestore usando el UID del usuario
                             return db.collection('usuarios').doc(user.uid).set({
                                 uid: user.uid,
                                 nombre: nombre,
                                 email: email,
-                                emailVerificado: user.emailVerified,
+                                emailVerificado: user.emailVerified, // Será false inicialmente
                                 fechaRegistro: firebase.firestore.FieldValue.serverTimestamp(),
                                 aceptoTerminos: true,
                                 activo: true,
@@ -153,12 +160,17 @@ document.addEventListener('DOMContentLoaded', function() {
                             });
                         });
                 })
+
                 .then(() => {
-                    showMessage('¡Registro exitoso! Revisa tu correo para verificar tu cuenta.');
+                    showMessage('¡Registro exitoso! 📧 Te hemos enviado un email de verificación. Por favor, verifica tu correo antes de iniciar sesión.');
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Registrarme';
+                    
+                    // 🔄 NUEVO: Cambiar automáticamente al modo de inicio de sesión
                     setTimeout(() => {
-                        window.location.href = "/index.html"; // Redirigir al inicio
+                        setLoginMode();
+                        // Opcional: Pre-llenar el email en el formulario de login
+                        if (emailInput) emailInput.value = email;
                     }, 3000);
                 })
                 .catch((error) => {
@@ -190,29 +202,39 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then((userCredential) => {
                     const user = userCredential.user;
                     console.log("Inicio de sesión exitoso:", user.email);
-                    
-                    // Actualizar última actividad en Firestore
+
+                    // Verificar si el email esta verificado
+                    if (!user.emailVerified) {
+                        // Si el email no esta verificado mostrara opciones
+                        mostrarModalVerificacion(user);
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'iniciar sesión'
+                        return; //detener el proceso de inicio de sesion
+                    }
+
+                    // si: email verificado - continuar con el inicio normalmente
+                    //actualizar el estado de verificación en firestore
                     db.collection('usuarios').doc(user.uid).update({
+                        emailVerificado: true,
                         'estadisticas.ultimaActividad': firebase.firestore.FieldValue.serverTimestamp()
-                    }).catch((error) => {
-                        console.log("Error al actualizar última actividad:", error);
-                        // No es crítico, continúa con el inicio de sesión
+                    }).catch((error)=>{ 
+                        console.log("Error al actualizar estado de verificación", error);
                     });
 
-                    showMessage('¡Inicio de sesión exitoso!');
-                    
-                    // Guardar opción "Recordarme" si está marcada
+                    showMessage('¡Inicio de sesión exitoso!')
+
+                    //Guardad opcion "recordarme" si esta es marcada
                     if (rememberCheck && rememberCheck.checked) {
                         localStorage.setItem('rememberLogin', 'true');
                     } else {
-                        localStorage.removeItem('rememberLogin');
+                        localStorage.removeItem('rememberLogin')
                     }
-                    
+
                     submitBtn.disabled = false;
-                    submitBtn.textContent = 'Iniciar sesión';
+                    submitBtn.textContent = 'Iniciar sesión'
                     
                     setTimeout(() => {
-                        window.location.href = "/index.html"; // Redirigir al inicio
+                        window.location.href = "/index.html";
                     }, 2000);
                 })
                 .catch((error) => {
@@ -247,7 +269,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    //===================================
     // Modal de términos y condiciones
+    //=====================================
+
     if (termsLink) {
         termsLink.addEventListener('click', function(e) {
             e.preventDefault();
@@ -279,7 +304,480 @@ document.addEventListener('DOMContentLoaded', function() {
             document.body.style.overflow = '';
         });
     }
+
+    // Inicializar inmediatamente (sin setTimeout)
+    inicializarSistemaRecuperacion();
 });
+
+//======================================
+// FUNCIONES PARA VERIFICACION DE EMAIL
+//======================================
+
+async function enviarEmailVerificacionSeguro(user) {
+    console.log("Enviando email de verificacion de forma segura...")
+
+    try{
+        //primer intento: sin URL personalizada
+        await user.sendEmailVerification();
+        console.log("email de verificacion enviado con exito")
+        return true;
+    } catch (error) {
+        console.error("error al enviar email de verificacion", error)
+
+        //si falla, mostrar mensaje pero no bloquear el registro
+        if (error.code === 'auth/unauthorized-continue-url'){
+            console.log("URL no autorizada, pero usuario registrado existosamente")
+        }
+
+        //no lanzar error para no bloquear el flujo de registro
+        return false;
+    }
+}
+
+//========================================
+// SISTEMA DE VERIFICACIÓN DE EMAIL
+//========================================
+
+//Mostrar modal de verificacion de email
+function mostrarModalVerificacion(user){
+    console.log("mostrando modal de verificacion para: ", user.email);
+
+    //crear modal
+    let modalVerificacion = document.getElementById('modalVerificacion');
+    
+    //mostrar el modal
+    modalVerificacion.style.display = 'flex';
+
+    configurarEventosModalesVerificacion(modalVerificacion, user);
+}
+
+//configurar eventos del modal de verificacion
+function configurarEventosModalesVerificacion(modal,user) {
+    //cerrar modal
+    const btnCerrar = document.getElementById('cerrarModalVerificacion');
+    if (btnCerrar){
+        btnCerrar.addEventListener('click', ()=> {
+            console.log("cerrando modal de verificacion")
+            modal.style.display = 'none';
+        });
+    }
+
+    const btnCancelar = document.getElementById('btnCancelarVerificacion');
+    if (btnCancelar){
+        btnCancelar.addEventListener('click', () =>{
+            console.log("cancelando modal de verificacion")
+            modal.style.display = 'none';
+        })
+    }
+
+    //reenviar email de verificacion
+    const btnReenviar = document.getElementById('btnReenviarVerificacion');
+    if(btnReenviar){
+        btnReenviar.addEventListener('click', async () =>{
+            await reenviarEmailVerificacionSeguro(user);
+        });
+    }
+
+    //cerrar al hacer click afuera del modal
+    modal.addEventListener('click', (e)=>{
+        if (e.target === modal){
+            modal.style.display = 'none';
+        }
+    })
+}
+
+//reenviar email de verificacion de forma segura
+async function reenviarEmailVerificacionSeguro(user) {
+    console.log("Reenviando email de verificacion de forma segura para ", user.email)
+
+    const btnReenviar = document.getElementById('btnReenviarVerificacion');
+
+    try{
+        //mostrar loading
+        if (btnReenviar) {
+            btnReenviar.disabled = true;
+            btnReenviar.innerHTML = '<span style="animation: spin 1s linear infinite;">🔄</span> Enviando...';
+        }
+
+        //enviar email de verificacion sin URL personalizada 
+        await user.sendEmailVerification();
+
+        console.log("email de verificacion reenviado exitosamente ,':)");
+
+        //mostrar mensaje de exito al usuario
+        mostrarMensajeModalVerificacion("El email de verificacion ha sido enviado exitosamente. Revisa tu correo.");
+
+    } catch(error) {
+        console.log("error al reenviar el email de verificacion", error);
+
+        let mensajeError = "Error al enviar email de verificacion.";
+
+        switch (error.code) {
+            case 'auth/too-many-request':
+                mensajeError = "Demasiados intentos. espera unos minutos antes de intentar de nuevo";
+            break;
+            case 'auth/network-request-failed':
+                mensajeError = "error de conexion. verifica tu conexion a internet";
+            break;
+            default:
+                mensajeError = "Error: " + error.message;
+        }
+        mostrarMensajeModalVerificacion(mensajeError, "error")
+    } finally {
+        //restaurar boton
+        if (btnReenviar) {
+            btnReenviar.disabled = false;
+            btnReenviar.innerHTML = 'Reenviar Email';
+        }
+    }
+}
+
+//mostrar mensaje en el modal de verficacion
+function mostrarMensajeModalVerificacion(mensaje, tipo){
+    const modal = document.getElementById('modalVerificacion');
+    if (!modal) return;
+
+    //elminar mensaje anterior
+    const mensajeAnterior = modal.querySelector('.mensaje-verificacion');
+    if (mensajeAnterior) {
+        mensajeAnterior.remove();
+    }
+
+    const mensajeDiv = document.createElement('div');
+    mensajeDiv.className = 'mensaje-Verificacion';
+    mensajeDiv.style.cssText = `
+        margin-bottom: 15px;
+        padding: 10px;
+        border-radius: 5px;
+        font-size: 14px;
+        ${tipo === 'success'?
+            'backgroun-color: #d4edda; color: #155724; border:':
+            'backgroun-color: #f8d7da; color:rgb(255, 255, 255);'
+        }
+    `;
+    mensajeDiv.innerHTML = `
+        <span>${mensaje}</span>
+        <button onclick="this.parentElement.remove()" style="
+            float: right;
+            background: none;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        ">x</button
+    `;
+
+    const modalBody = modal.querySelector('div > div:last-child');
+    modalBody.insertBefore(mensajeDiv, modalBody.firstChild);
+
+    //auto eliminar despues de 5 segs
+    if (tipo === 'success'){
+        setTimeout(()=>{
+            if (mensajeDiv.parentElement){
+                mensajeDiv.remove();
+            }
+        }, 5000);
+    }
+}
+
+//monitor de estado de autenticación
+firebase.auth().onAuthStateChanged((user)=>{
+    if (user){
+        //refrescar informacion del ususario
+        user.reload().then(()=>{
+            if (user.emailVerified){
+                //actualizar estado en firestore si ahora esta verificado
+                db.collection('usuarios').doc(user.uid).update({
+                    emailVerificado: true
+                }). then(()=>{
+                    console.log("estado de verificacion actualizdo en firestore");
+                });
+            }
+        });
+    }
+});
+
+//======================================================
+//======= FUNCIONES DE RECUPERACIÓN DE CONTRASEÑA ======
+//======================================================
+// Función principal de recuperación (CORREGIDA)
+async function recuperarContrasena(email) {
+    console.log("🔄 Iniciando recuperación de contraseña para:", email);
+    
+    // Verificar que Firebase esté disponible
+    if (!firebase || !firebase.auth) {
+        console.error("❌ Firebase Auth no está disponible");
+        mostrarMensajeRecuperacion("Error de configuración. Inténtalo más tarde.", "error");
+        return false;
+    }
+    
+    if (!email || !esEmailValido(email)) {
+        mostrarMensajeRecuperacion("⚠️ Por favor, ingresa un email válido.", "warning");
+        return false;
+    }
+    
+    try {
+        mostrarCargandoRecuperacion(true);
+        
+        //Envío simple sin URL personalizada para evitar el error de dominio
+        await firebase.auth().sendPasswordResetEmail(email);
+        
+        console.log("✅ Email de recuperación enviado exitosamente");
+        mostrarMensajeRecuperacion(
+            "Email de recuperación enviado exitosamente. Revisa tu bandeja de entrada o carpeta de spam.",
+            "success"
+        );
+        
+        return true;
+        
+    } catch (error) {
+        console.error("❌ Error al enviar email de recuperación:", error);
+        
+        let mensajeError = "Error al enviar el email. Inténtalo de nuevo.";
+        
+        switch (error.code) {
+            case 'auth/user-not-found':
+                mensajeError = "❌ No existe una cuenta registrada con ese email.";
+                break;
+            case 'auth/invalid-email':
+                mensajeError = "❌ El formato del email no es válido.";
+                break;
+            case 'auth/too-many-requests':
+                mensajeError = "⏰ Demasiados intentos. Espera unos minutos antes de intentar de nuevo.";
+                break;
+            case 'auth/network-request-failed':
+                mensajeError = "🌐 Error de conexión. Verifica tu conexión a internet.";
+                break;
+            case 'auth/unauthorized-continue-url':
+                mensajeError = "⚙️ Error de configuración. El email se enviará a la página por defecto de Firebase.";
+                // Intentar envío sin URL personalizada
+                try {
+                    await firebase.auth().sendPasswordResetEmail(email);
+                    mostrarMensajeRecuperacion("📧 Email de recuperación enviado. Revisa tu bandeja.", "success");
+                    return true;
+                } catch (retryError) {
+                    console.error("Error en reintento:", retryError);
+                }
+                break;
+            default:
+                mensajeError = `❌ Error: ${error.message}`;
+        }
+        
+        mostrarMensajeRecuperacion(mensajeError, "error");
+        return false;
+        
+    } finally {
+        mostrarCargandoRecuperacion(false);
+    }
+}
+
+// Validación de email
+function esEmailValido(email) {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+}
+
+// Mostrar/ocultar loading
+function mostrarCargandoRecuperacion(mostrar) {
+    const btnRecuperar = document.getElementById('btnRecuperar');
+    
+    if (btnRecuperar) {
+        if (mostrar) {
+            btnRecuperar.disabled = true;
+            btnRecuperar.innerHTML = '<span class="icono-carga">🔄</span> Enviando...';
+        } else {
+            btnRecuperar.disabled = false;
+            btnRecuperar.innerHTML = 'Enviar';
+        }
+    }
+}
+
+// Mostrar mensajes en el modal
+function mostrarMensajeRecuperacion(mensaje, tipo = "info") {
+    // Eliminar mensaje anterior si existe
+    const mensajeAnterior = document.querySelector('.mensaje-recuperacion');
+    if (mensajeAnterior) {
+        mensajeAnterior.remove();
+    }
+    
+    const mensajeDiv = document.createElement('div');
+    mensajeDiv.className = `mensaje-recuperacion mensaje-${tipo}`;
+    mensajeDiv.innerHTML = `
+        <div class="mensaje-contenido">
+            <span class="mensaje-texto">${mensaje}</span>
+            <button class="mensaje-cerrar" onclick="this.parentElement.parentElement.remove()">×</button>
+        </div>
+    `;
+    
+    const modal = document.getElementById('modalRecuperacion');
+    const formulario = modal ? modal.querySelector('.formulario-recuperacion') : null;
+    
+    if (formulario) {
+        formulario.insertBefore(mensajeDiv, formulario.firstChild);
+    }
+    
+    // Auto-eliminar mensajes de éxito después de 5 segundos
+    if (tipo === 'success') {
+        setTimeout(() => {
+            if (mensajeDiv.parentElement) {
+                mensajeDiv.remove();
+            }
+        }, 5000);
+    }
+}
+
+// Funciones del modal
+function abrirModalRecuperacion() {
+    console.log("🔓 Abriendo modal de recuperación");
+    const modal = document.getElementById('modalRecuperacion');
+    if (modal) {
+        modal.style.display = 'flex';
+        
+        // Pre-llenar con el email del formulario de login si existe
+        const emailInput = document.getElementById('emailRecuperacion');
+        const emailLogin = document.getElementById('email');
+        
+        if (emailInput && emailLogin && emailLogin.value.trim()) {
+            emailInput.value = emailLogin.value.trim();
+        }
+        
+        // Enfocar el input de email
+        if (emailInput) {
+            setTimeout(() => emailInput.focus(), 100);
+        }
+        
+        // Limpiar mensajes anteriores
+        const mensajeAnterior = document.querySelector('.mensaje-recuperacion');
+        if (mensajeAnterior) {
+            mensajeAnterior.remove();
+        }
+        
+        // Resetear el estado del botón
+        mostrarCargandoRecuperacion(false);
+    }
+}
+
+function cerrarModalRecuperacion() {
+    console.log("🔒 Cerrando modal de recuperación");
+    const modal = document.getElementById('modalRecuperacion');
+    if (modal) {
+        modal.style.display = 'none';
+        
+        // Limpiar el formulario
+        const emailInput = document.getElementById('emailRecuperacion');
+        if (emailInput) {
+            emailInput.value = '';
+        }
+        
+        // Limpiar mensajes
+        const mensajeAnterior = document.querySelector('.mensaje-recuperacion');
+        if (mensajeAnterior) {
+            mensajeAnterior.remove();
+        }
+    }
+}
+
+// CORREGIDO: Manejar formulario de recuperación
+async function manejarFormularioRecuperacion(event) {
+    event.preventDefault();
+    console.log("📝 Procesando formulario de recuperación");
+    
+    const emailInput = document.getElementById('emailRecuperacion');
+    const email = emailInput ? emailInput.value.trim() : '';
+    
+    if (!email) {
+        mostrarMensajeRecuperacion("⚠️ Por favor, ingresa tu email.", "warning");
+        return;
+    }
+    
+    // Ejecutar la recuperación
+    const exito = await recuperarContrasena(email);
+    
+    // Si fue exitoso, cerrar el modal después de 3 segundos
+    if (exito) {
+        setTimeout(() => {
+            cerrarModalRecuperacion();
+        }, 3000);
+    }
+}
+
+// CORREGIDO: Inicializar sistema de recuperación
+function inicializarSistemaRecuperacion() {
+    console.log("Sistema de recuperacion de contraseña activo");
+    
+    // 1. Configurar botón "Olvidé mi contraseña"
+    const btnOlvideContrasena = document.getElementById('btnOlvideContrasena');
+    if (btnOlvideContrasena) {
+        btnOlvideContrasena.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log("🔗 Click en 'Olvidé mi contraseña'");
+            abrirModalRecuperacion();
+        });
+        console.log("✅ Botón 'Olvidé contraseña' configurado");
+    } else {
+        console.error("❌ No se encontró el botón 'Olvidé contraseña'");
+    }
+    
+    // 2. Configurar modal de recuperación
+    const modal = document.getElementById('modalRecuperacion');
+    if (modal) {
+        // Botón cerrar (X)
+        const btnCerrar = modal.querySelector('.cerrar-modal');
+        if (btnCerrar) {
+            btnCerrar.addEventListener('click', cerrarModalRecuperacion);
+            console.log("✅ Botón cerrar modal configurado");
+        }
+        
+        // Botón cancelar
+        const btnCancelar = document.getElementById('btnCancelarRecuperacion');
+        if (btnCancelar) {
+            btnCancelar.addEventListener('click', cerrarModalRecuperacion);
+            console.log("✅ Botón cancelar configurado");
+        }
+        
+        // CORREGIDO: Formulario de recuperación
+        const formulario = document.getElementById('formularioRecuperacion');
+        if (formulario) {
+            formulario.addEventListener('submit', manejarFormularioRecuperacion);
+            console.log("✅ Formulario de recuperación configurado");
+        } else {
+            console.error("❌ No se encontró el formulario de recuperación");
+        }
+        
+        // Cerrar modal al hacer click fuera
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                cerrarModalRecuperacion();
+            }
+        });
+        
+        // Cerrar modal con tecla Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && modal.style.display === 'flex') {
+                cerrarModalRecuperacion();
+            }
+        });
+        
+        console.log("✅ Modal de recuperación configurado");
+    } else {
+        console.error("❌ No se encontró el modal de recuperación");
+    }
+    
+    // 3. Validación en tiempo real del email
+    const emailInput = document.getElementById('emailRecuperacion');
+    if (emailInput) {
+        emailInput.addEventListener('input', function() {
+            const email = this.value.trim();
+            const btnRecuperar = document.getElementById('btnRecuperar');
+            
+            if (btnRecuperar) {
+                btnRecuperar.disabled = !email || !esEmailValido(email);
+            }
+        });
+        console.log("✅ Validación en tiempo real configurada");
+    }
+    
+    console.log("🚀 Sistema de recuperación inicializado correctamente");
+}
 
 // Modo Oscuro
 document.addEventListener("DOMContentLoaded", function () {
@@ -310,249 +808,4 @@ document.addEventListener("DOMContentLoaded", function () {
     if (toggleThemeBtn) {
         toggleThemeBtn.addEventListener("click", toggleDarkMode);
     }
-});
-
-// ====== SISTEMA DE RECUPERACIÓN DE CONTRASEÑA ======
-
-// Función principal de recuperación
-async function recuperarContrasena(email) {
-    console.log("🔄 Iniciando recuperación de contraseña para:", email);
-    
-    if (!firebase.auth) {
-        console.error("❌ Firebase Auth no está disponible");
-        mostrarMensajeRecuperacion("Error de configuración. Inténtalo más tarde.", "error");
-        return false;
-    }
-    
-    if (!email || !esEmailValido(email)) {
-        mostrarMensajeRecuperacion("⚠️ Por favor, ingresa un email válido.", "warning");
-        return false;
-    }
-    
-    try {
-        mostrarCargandoRecuperacion(true);
-        
-        await firebase.auth().sendPasswordResetEmail(email, {
-            url: window.location.origin + '/contenido_de_la_pagina/Inicio_de_sesion/Inicio_de_sesion.html',
-            handleCodeInApp: false
-        });
-        
-        console.log("✅ Email de recuperación enviado exitosamente");
-        mostrarMensajeRecuperacion(
-            "📧 Email de recuperación enviado. Revisa tu bandeja de entrada y spam.",
-            "success"
-        );
-        
-        return true;
-        
-    } catch (error) {
-        console.error("❌ Error al enviar email de recuperación:", error);
-        
-        let mensajeError = "Error al enviar el email. Inténtalo de nuevo.";
-        
-        switch (error.code) {
-            case 'auth/user-not-found':
-                mensajeError = "❌ No existe una cuenta con ese email.";
-                break;
-            case 'auth/invalid-email':
-                mensajeError = "❌ El formato del email no es válido.";
-                break;
-            case 'auth/too-many-requests':
-                mensajeError = "⏰ Demasiados intentos. Espera unos minutos e inténtalo de nuevo.";
-                break;
-            case 'auth/network-request-failed':
-                mensajeError = "🌐 Error de conexión. Verifica tu internet.";
-                break;
-            default:
-                mensajeError = `❌ Error: ${error.message}`;
-        }
-        
-        mostrarMensajeRecuperacion(mensajeError, "error");
-        return false;
-        
-    } finally {
-        mostrarCargandoRecuperacion(false);
-    }
-}
-
-// Validación de email
-function esEmailValido(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-}
-
-// Mostrar/ocultar loading
-function mostrarCargandoRecuperacion(mostrar) {
-    const btnRecuperar = document.getElementById('btnRecuperar');
-    const iconoCarga = document.getElementById('iconoCargaRecuperacion');
-    
-    if (btnRecuperar) {
-        if (mostrar) {
-            btnRecuperar.disabled = true;
-            btnRecuperar.innerHTML = '<span id="iconoCargaRecuperacion" class="icono-carga">🔄</span> Enviando...';
-        } else {
-            btnRecuperar.disabled = false;
-            btnRecuperar.innerHTML = 'Enviar Email';
-        }
-    }
-}
-
-// Mostrar mensajes en el modal
-function mostrarMensajeRecuperacion(mensaje, tipo = "info") {
-    const mensajeAnterior = document.querySelector('.mensaje-recuperacion');
-    if (mensajeAnterior) {
-        mensajeAnterior.remove();
-    }
-    
-    const mensajeDiv = document.createElement('div');
-    mensajeDiv.className = `mensaje-recuperacion mensaje-${tipo}`;
-    mensajeDiv.innerHTML = `
-        <div class="mensaje-contenido">
-            <span class="mensaje-icono">${obtenerIconoMensaje(tipo)}</span>
-            <span class="mensaje-texto">${mensaje}</span>
-            <button class="mensaje-cerrar" onclick="this.parentElement.parentElement.remove()">×</button>
-        </div>
-    `;
-    
-    const modal = document.getElementById('modalRecuperacion');
-    const formulario = modal ? modal.querySelector('.formulario-recuperacion') : null;
-    
-    if (formulario) {
-        formulario.insertBefore(mensajeDiv, formulario.firstChild);
-    }
-    
-    if (tipo === 'success') {
-        setTimeout(() => {
-            if (mensajeDiv.parentElement) {
-                mensajeDiv.remove();
-            }
-        }, 5000);
-    }
-}
-
-// Obtener iconos para mensajes
-function obtenerIconoMensaje(tipo) {
-    const iconos = {
-        success: '✅',
-        error: '❌',
-        warning: '⚠️',
-        info: 'ℹ️'
-    };
-    return iconos[tipo] || 'ℹ️';
-}
-
-// Funciones del modal
-function abrirModalRecuperacion() {
-    const modal = document.getElementById('modalRecuperacion');
-    if (modal) {
-        modal.style.display = 'flex';
-        
-        const emailInput = document.getElementById('emailRecuperacion');
-        const emailLogin = document.getElementById('email');
-        
-        // Pre-llenar con el email del formulario de login si existe
-        if (emailInput && emailLogin && emailLogin.value.trim()) {
-            emailInput.value = emailLogin.value.trim();
-        }
-        
-        if (emailInput) {
-            emailInput.focus();
-        }
-        
-        const mensajeAnterior = document.querySelector('.mensaje-recuperacion');
-        if (mensajeAnterior) {
-            mensajeAnterior.remove();
-        }
-    }
-}
-
-function cerrarModalRecuperacion() {
-    const modal = document.getElementById('modalRecuperacion');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-}
-
-// Manejar formulario de recuperación
-async function manejarFormularioRecuperacion(event) {
-    event.preventDefault();
-    
-    const emailInput = document.getElementById('emailRecuperacion');
-    const email = emailInput ? emailInput.value.trim() : '';
-    
-    if (!email) {
-        mostrarMensajeRecuperacion("⚠️ Por favor, ingresa tu email.", "warning");
-        return;
-    }
-    
-    const exito = await recuperarContrasena(email);
-    
-    if (exito) {
-        setTimeout(() => {
-            cerrarModalRecuperacion();
-        }, 3000);
-    }
-}
-
-// Inicializar sistema de recuperación
-function inicializarSistemaRecuperacion() {
-    console.log("🔧 Inicializando sistema de recuperación de contraseña...");
-    
-    const btnOlvideContrasena = document.getElementById('btnOlvideContrasena');
-    if (btnOlvideContrasena) {
-        btnOlvideContrasena.addEventListener('click', function(e) {
-            e.preventDefault();
-            abrirModalRecuperacion();
-        });
-        console.log("✅ Botón 'Olvidé contraseña' configurado");
-    }
-    
-    const modal = document.getElementById('modalRecuperacion');
-    if (modal) {
-        const btnCerrar = modal.querySelector('.cerrar-modal');
-        if (btnCerrar) {
-            btnCerrar.addEventListener('click', cerrarModalRecuperacion);
-        }
-        
-        const formulario = modal.querySelector('.formulario-recuperacion');
-        if (formulario) {
-            formulario.addEventListener('submit', manejarFormularioRecuperacion);
-        }
-        
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                cerrarModalRecuperacion();
-            }
-        });
-        
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape' && modal.style.display === 'flex') {
-                cerrarModalRecuperacion();
-            }
-        });
-        
-        console.log("✅ Modal de recuperación configurado");
-    }
-    
-    // Validación en tiempo real
-    const emailInput = document.getElementById('emailRecuperacion');
-    if (emailInput) {
-        emailInput.addEventListener('input', function() {
-            const email = this.value.trim();
-            const btnRecuperar = document.getElementById('btnRecuperar');
-            
-            if (btnRecuperar) {
-                btnRecuperar.disabled = !email || !esEmailValido(email);
-            }
-        });
-    }
-    
-    console.log("🚀 Sistema de recuperación inicializado");
-}
-
-// Inicializar cuando el DOM esté listo
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(() => {
-        inicializarSistemaRecuperacion();
-    }, 500);
 });

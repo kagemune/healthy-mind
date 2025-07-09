@@ -920,3 +920,4 @@ document.addEventListener("DOMContentLoaded", function () {
       toggleThemeBtn.addEventListener("click", toggleDarkMode);
   }
 });
+

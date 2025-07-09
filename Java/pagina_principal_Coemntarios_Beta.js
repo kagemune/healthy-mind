@@ -656,7 +656,7 @@ async function verificarComentario(texto) {
              
         try {
             console.log("Enviando petición a API:", texto);
-            const response = await fetch('/moderar', {
+            const response = await fetch('http://localhost:5000/moderar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contenido: texto })
@@ -673,7 +673,7 @@ async function verificarComentario(texto) {
                 statusIcon.textContent = '✅';
                 statusText.textContent = 'Contenido apropiado. Puedes publicar tu comentario.';
                 console.log("Comentario aprobado");
-            // } else 
+            } else {
                 btnPublicar.disabled = true;
                 statusIndicator.className = 'status-indicator status-rejected';
                 statusIcon.textContent = '❌';
@@ -724,7 +724,7 @@ async function verificarRespuesta(texto, boton, indicador, icono, textoIndicador
         textoIndicador.innerHTML = '<span class="loader"></span>Verificando contenido...';
         
         try {
-            const response = await fetch('/moderar', {
+            const response = await fetch('http://localhost:5000/moderar', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ contenido: texto })
@@ -1282,128 +1282,337 @@ function esperarYCargarComentarios() {
 // ---------------------------
 // Notificaciones de respuestas - VERSIÓN CORREGIDA
 // ---------------------------
+// ============================
+// SISTEMA DE NOTIFICACIONES CORREGIDO
+// ============================
+
 function setupResponseNotifications() {
-  // Verificar autenticación primero
-  if (!auth || !auth.currentUser) {
-    console.log('⚠️ Usuario no autenticado - no se configuran notificaciones');
-    return;
-  }
-
-  // 1. Pedir permiso para notificaciones
-  if (!('Notification' in window)) {
-    console.warn('Este navegador no soporta notificaciones.');
-    return;
-  }
-  
-  if (Notification.permission === 'default') {
-    Notification.requestPermission().then(permission => {
-      console.log('Permiso de notificaciones:', permission);
-    });
-  }
-
-  console.log('🔔 Configurando notificaciones para:', auth.currentUser.uid);
-
-  // ✅ SOLUCIÓN: Guardar timestamp de inicio para evitar notificaciones de respuestas existentes
-  const inicioListener = new Date();
-
-  // 2. Escuchar respuestas con mejor manejo de errores
-  const unsubscribe = db.collection('respuestas')
-    .where('activo', '==', true)
-    .onSnapshot(snapshot => {
-      if (!auth.currentUser) {
-        console.log('⚠️ Usuario ya no autenticado - deteniendo listener');
-        unsubscribe();
+    // Verificar autenticación primero
+    if (!auth || !auth.currentUser) {
+        console.log('⚠️ Usuario no autenticado - no se configuran notificaciones');
         return;
-      }
+    }
 
-      snapshot.docChanges().forEach(async change => {
-        // ✅ SOLO procesar respuestas NUEVAS (añadidas después de configurar el listener)
-        if (change.type !== 'added') return;
-        
-        const resp = change.doc.data();
-        
-        // ✅ FILTRO: Solo procesar respuestas creadas DESPUÉS de configurar notificaciones
-        if (resp.timestamp && resp.timestamp.toDate() < inicioListener) {
-          console.log('🚫 Respuesta anterior al listener, ignorando:', resp.texto?.substring(0, 20));
-          return;
-        }
+    console.log('🔔 Configurando notificaciones para:', auth.currentUser.uid);
 
-        try {
-          console.log('🔔 Procesando nueva respuesta:', resp.texto?.substring(0, 30));
-          
-          // 3. Obtener el comentario original con manejo de errores mejorado
-          const comentarioSnap = await db.collection('comentarios')
-            .doc(resp.comentarioId).get();
-            
-          if (!comentarioSnap.exists) {
-            console.log('❌ Comentario no encontrado:', resp.comentarioId);
-            return;
-          }
-          
-          const comentario = comentarioSnap.data();
+    // 1. SOLICITAR PERMISOS DE NOTIFICACIÓN CORRECTAMENTE
+    if (!('Notification' in window)) {
+        console.warn('❌ Este navegador no soporta notificaciones.');
+        return;
+    }
 
-          // 4. ✅ CONDICIÓN MEJORADA: Mostrar notificación si es TU comentario y NO eres el autor de la respuesta
-          if (comentario.uid === auth.currentUser.uid && resp.uid !== auth.currentUser.uid) {
-            console.log('🎯 Enviando notificación para respuesta de:', resp.usuario);
-            
-            // ✅ VERIFICAR PERMISOS antes de crear notificación
-            if (Notification.permission === 'granted') {
-              const texto = resp.texto.length > 30
-                ? resp.texto.slice(0, 27) + '…'
-                : resp.texto;
-                
-              const notification = new Notification('🔔 Nueva respuesta', {
-                body: `${resp.usuario}: "${texto}"`,
-                icon: resp.avatar || '/Imagenes/Avatares/Avatar1.jpg',
-                tag: resp.comentarioId, // Evita duplicados
-                requireInteraction: false // Se cierra automáticamente
-              });
-              
-              // Auto-cerrar después de 5 segundos
-              setTimeout(() => notification.close(), 5000);
-              
-              console.log('✅ Notificación enviada exitosamente');
+    // Solicitar permisos si no están concedidos
+    if (Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+            console.log('📋 Permiso de notificaciones:', permission);
+            if (permission === 'granted') {
+                console.log('✅ Permisos de notificación concedidos');
+                iniciarListenerNotificaciones();
             } else {
-              console.log('❌ Sin permisos para mostrar notificaciones');
+                console.log('❌ Permisos de notificación denegados');
             }
-          } else {
-            console.log('🚫 No enviar notificación:', {
-              esmiComentario: comentario.uid === auth.currentUser.uid,
-              soyelAutorRespuesta: resp.uid === auth.currentUser.uid
-            });
-          }
-        } catch (error) {
-          console.error('❌ Error procesando notificación:', error);
-          
-          // ✅ RECONEXIÓN automática si hay error de permisos
-          if (error.code === 'permission-denied') {
-            console.log('🔄 Error de permisos, reintentando en 10 segundos...');
-            setTimeout(() => {
-              if (auth && auth.currentUser) {
-                setupResponseNotifications();
-              }
-            }, 10000);
-          }
-        }
-      });
-    }, error => {
-      console.error('❌ Error en listener de respuestas:', error);
-      
-      // ✅ RECONEXIÓN automática después de error
-      setTimeout(() => {
-        if (auth && auth.currentUser) {
-          console.log('🔄 Reintentando configurar notificaciones...');
-          setupResponseNotifications();
-        }
-      }, 5000);
-    });
-
-  // Guardar referencia para limpiar después
-  window.notificationsUnsubscribe = unsubscribe;
-  
-  console.log('✅ Listener de notificaciones configurado correctamente');
+        });
+    } else if (Notification.permission === 'granted') {
+        console.log('✅ Permisos ya concedidos, iniciando listener');
+        iniciarListenerNotificaciones();
+    } else {
+        console.log('❌ Notificaciones bloqueadas por el usuario');
+        return;
+    }
 }
 
+function iniciarListenerNotificaciones() {
+    if (!auth || !auth.currentUser) return;
+
+    console.log('🚀 Iniciando listener de notificaciones - SOLO RESPUESTAS FUTURAS');
+
+    // ✅ GUARDAR TIMESTAMP DEL MOMENTO EXACTO QUE SE CONFIGURA EL LISTENER
+    const timestampConfiguracion = Date.now();
+    console.log('⏰ Timestamp configuración listener:', new Date(timestampConfiguracion).toLocaleString());
+
+    // ✅ LISTENER QUE SOLO PROCESA RESPUESTAS POSTERIORES A LA CONFIGURACIÓN
+    const unsubscribe = db.collection('respuestas')
+        .where('activo', '==', true)
+        .onSnapshot(snapshot => {
+            if (!auth.currentUser) {
+                console.log('⚠️ Usuario ya no autenticado - deteniendo listener');
+                unsubscribe();
+                return;
+            }
+
+            console.log('📨 Snapshot recibido con', snapshot.docChanges().length, 'cambios');
+
+            snapshot.docChanges().forEach(async change => {
+                // ✅ SOLO PROCESAR RESPUESTAS AÑADIDAS
+                if (change.type !== 'added') {
+                    console.log('🚫 Cambio ignorado (no es añadido):', change.type);
+                    return;
+                }
+
+                const resp = change.doc.data();
+                const respuestaId = change.doc.id;
+
+                console.log('🔍 Procesando respuesta:', {
+                    id: respuestaId,
+                    autor: resp.usuario,
+                    texto: resp.texto?.substring(0, 30) + '...',
+                    timestamp: resp.timestamp?.toDate?.()?.toLocaleString() || 'Sin timestamp',
+                    fechaCreacion: resp.fechaCreacion
+                });
+
+                // ✅ FILTRO INTELIGENTE: Solo respuestas DESPUÉS de configurar el listener
+                let esRespuestaPostConfiguracion = false;
+                let fechaRespuesta = null;
+
+                if (resp.timestamp && resp.timestamp.toDate) {
+                    // Preferir timestamp de Firestore (más preciso)
+                    fechaRespuesta = resp.timestamp.toDate().getTime();
+                    esRespuestaPostConfiguracion = fechaRespuesta > timestampConfiguracion;
+                    console.log('⏰ Verificación timestamp Firestore:', {
+                        respuesta: new Date(fechaRespuesta).toLocaleString(),
+                        configuracion: new Date(timestampConfiguracion).toLocaleString(),
+                        esPosterior: esRespuestaPostConfiguracion,
+                        diferencia: `${((fechaRespuesta - timestampConfiguracion) / 1000).toFixed(2)} segundos`
+                    });
+                } else if (resp.fechaCreacion) {
+                    // Fallback a fechaCreacion
+                    fechaRespuesta = new Date(resp.fechaCreacion).getTime();
+                    esRespuestaPostConfiguracion = fechaRespuesta > timestampConfiguracion;
+                    console.log('⏰ Verificación fechaCreacion:', {
+                        respuesta: new Date(fechaRespuesta).toLocaleString(),
+                        configuracion: new Date(timestampConfiguracion).toLocaleString(),
+                        esPosterior: esRespuestaPostConfiguracion,
+                        diferencia: `${((fechaRespuesta - timestampConfiguracion) / 1000).toFixed(2)} segundos`
+                    });
+                } else {
+                    // Sin timestamp - probablemente respuesta muy nueva, procesar
+                    esRespuestaPostConfiguracion = true;
+                    console.log('⚠️ Sin timestamp válido - procesando como nueva');
+                }
+
+                if (!esRespuestaPostConfiguracion) {
+                    console.log('🚫 Respuesta anterior a configuración del listener - IGNORANDO');
+                    return;
+                }
+
+                console.log('✅ Respuesta posterior a configuración - PROCESANDO');
+
+                try {
+                    console.log('🔍 Obteniendo comentario original para respuesta:', resp.comentarioId);
+                    
+                    // Obtener el comentario original
+                    const comentarioSnap = await db.collection('comentarios')
+                        .doc(resp.comentarioId).get();
+                        
+                    if (!comentarioSnap.exists) {
+                        console.log('❌ Comentario no encontrado:', resp.comentarioId);
+                        return;
+                    }
+                    
+                    const comentario = comentarioSnap.data();
+                    console.log('📝 Comentario encontrado:', {
+                        autor: comentario.usuario,
+                        uid: comentario.uid,
+                        texto: comentario.texto?.substring(0, 30) + '...'
+                    });
+
+                    // Verificar si debo mostrar notificación
+                    const esmiComentario = comentario.uid === auth.currentUser.uid;
+                    const soyelAutorRespuesta = resp.uid === auth.currentUser.uid;
+
+                    console.log('🎯 Evaluando notificación:', {
+                        esmiComentario,
+                        soyelAutorRespuesta,
+                        deberiaNotificar: esmiComentario && !soyelAutorRespuesta
+                    });
+
+                    if (esmiComentario && !soyelAutorRespuesta) {
+                        console.log('🔔 ¡Enviando notificación para respuesta NUEVA!');
+                        await enviarNotificacion(resp, comentario);
+                    } else {
+                        console.log('🚫 No enviar notificación:', {
+                            razon: !esmiComentario ? 'No es mi comentario' : 'Soy el autor de la respuesta'
+                        });
+                    }
+                    
+                } catch (error) {
+                    console.error('❌ Error procesando notificación:', error);
+                }
+            });
+        }, error => {
+            console.error('❌ Error en listener de respuestas:', error);
+            
+            // Reconexión automática después de error
+            setTimeout(() => {
+                if (auth && auth.currentUser) {
+                    console.log('🔄 Reintentando configurar notificaciones...');
+                    setupResponseNotifications();
+                }
+            }, 5000);
+        });
+
+    // Guardar referencia para limpiar después
+    window.notificationsUnsubscribe = unsubscribe;
+    console.log('✅ Listener configurado - Solo notificará respuestas POSTERIORES a este momento');
+}
+
+async function enviarNotificacion(respuesta, comentario) {
+    try {
+        console.log('📢 Preparando notificación:', {
+            deAutor: respuesta.usuario,
+            texto: respuesta.texto?.substring(0, 30) + '...'
+        });
+
+        // ✅ VERIFICAR PERMISOS JUSTO ANTES DE ENVIAR
+        if (Notification.permission !== 'granted') {
+            console.log('❌ Sin permisos para mostrar notificaciones');
+            return;
+        }
+
+        // Preparar contenido de la notificación
+        const textoCorto = respuesta.texto && respuesta.texto.length > 50
+            ? respuesta.texto.slice(0, 47) + '...'
+            : respuesta.texto || 'Nueva respuesta';
+
+        const options = {
+            body: `${respuesta.usuario || 'Alguien'} respondió: "${textoCorto}"`,
+            icon: respuesta.avatar || '/Imagenes/Avatares/Avatar1.jpg',
+            badge: '/Imagenes/Avatares/Avatar1.jpg',
+            tag: `respuesta-${respuesta.comentarioId}-${Date.now()}`, // Tag único para evitar reemplazos
+            requireInteraction: true, // ✅ MANTENER NOTIFICACIÓN HASTA QUE EL USUARIO INTERACTÚE
+            silent: false, // Permitir sonido
+            timestamp: Date.now(),
+            data: {
+                comentarioId: respuesta.comentarioId,
+                respuestaId: respuesta.id || Date.now(),
+                tipo: 'respuesta'
+            }
+        };
+
+        console.log('🔔 Creando notificación PERSISTENTE con opciones:', options);
+
+        // ✅ CREAR NOTIFICACIÓN
+        const notification = new Notification('💬 Nueva respuesta a tu comentario', options);
+        
+        console.log('✅ Notificación creada exitosamente - PERSISTENTE');
+
+        // Eventos de la notificación
+        notification.onclick = function() {
+            console.log('👆 Click en notificación');
+            window.focus();
+            
+            // Buscar y hacer scroll al comentario
+            const comentarioElement = document.querySelector(`[data-id="${respuesta.comentarioId}"]`);
+            if (comentarioElement) {
+                comentarioElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            
+            notification.close();
+        };
+
+        notification.onerror = function(event) {
+            console.error('❌ Error en notificación:', event);
+        };
+
+        notification.onshow = function() {
+            console.log('👁️ Notificación mostrada - PERSISTENTE');
+        };
+
+        notification.onclose = function() {
+            console.log('❌ Notificación cerrada por usuario');
+        };
+
+        // ✅ NO AUTO-CERRAR - La notificación permanece hasta que el usuario la cierre
+        console.log('⚡ Notificación configurada para permanecer hasta interacción del usuario');
+
+    } catch (error) {
+        console.error('💥 Error al enviar notificación:', error);
+    }
+}
+
+// ============================
+// FUNCIONES DE PRUEBA
+// ============================
+
+// Función para probar notificaciones manualmente
+window.probarNotificacion = function() {
+    if (Notification.permission !== 'granted') {
+        console.log('❌ Sin permisos para notificaciones');
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                crearNotificacionPrueba();
+            }
+        });
+    } else {
+        crearNotificacionPrueba();
+    }
+};
+
+function crearNotificacionPrueba() {
+    console.log('🧪 Creando notificación de prueba...');
+    
+    const notification = new Notification('🧪 Notificación de Prueba', {
+        body: 'Si ves esto, las notificaciones funcionan correctamente',
+        icon: '/Imagenes/Avatares/Avatar1.jpg',
+        tag: 'prueba',
+        requireInteraction: false
+    });
+
+    notification.onclick = () => {
+        console.log('✅ Click en notificación de prueba detectado');
+        notification.close();
+    };
+
+    setTimeout(() => notification.close(), 5000);
+}
+
+// Función para verificar estado de notificaciones
+window.verificarNotificaciones = function() {
+    console.log('=== 🔍 VERIFICACIÓN DE NOTIFICACIONES ===');
+    console.log('Soporte del navegador:', 'Notification' in window);
+    console.log('Permisos:', Notification.permission);
+    console.log('Usuario autenticado:', !!auth?.currentUser);
+    console.log('UID usuario:', auth?.currentUser?.uid || 'N/A');
+    console.log('Listener activo:', !!window.notificationsUnsubscribe);
+    
+    if (Notification.permission === 'granted') {
+        console.log('✅ Todo listo para notificaciones');
+        console.log('💡 Puedes usar probarNotificacion() para hacer una prueba');
+    } else {
+        console.log('❌ Necesitas conceder permisos de notificación');
+    }
+};
+
+// ============================
+// INICIALIZACIÓN AUTOMÁTICA
+// ============================
+
+// Configurar notificaciones cuando el usuario se autentique
+if (typeof auth !== 'undefined' && auth) {
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            console.log('👤 Usuario autenticado, configurando notificaciones...');
+            // Esperar un poco para asegurar que todo esté cargado
+            setTimeout(() => {
+                setupResponseNotifications();
+            }, 1000);
+        } else {
+            console.log('👋 Usuario no autenticado, limpiando notificaciones...');
+            if (window.notificationsUnsubscribe) {
+                window.notificationsUnsubscribe();
+                window.notificationsUnsubscribe = null;
+            }
+        }
+    });
+} else {
+    console.log('⚠️ Auth no disponible todavía, configurando listener...');
+    // Si auth no está disponible, intentar después
+    setTimeout(() => {
+        if (auth && auth.currentUser) {
+            setupResponseNotifications();
+        }
+    }, 2000);
+}
 // Configurar listener de autenticación
 auth.onAuthStateChanged(async (user) => {
     if (user) {
@@ -1802,27 +2011,85 @@ document.addEventListener("DOMContentLoaded", function () {
         body.classList.toggle("dark-mode");
         const isDarkMode = body.classList.contains("dark-mode");
         localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+    guardarTemaEnFirebase(isDarkMode);
 
         if (themeStatus) {
             themeStatus.textContent = isDarkMode ? "Oscuro" : "Claro";
         }
     }
 
-    if (localStorage.getItem("theme") === "dark") {
-        body.classList.add("dark-mode");
-        if (themeStatus) {
-            themeStatus.textContent = "Oscuro";
+// Escuchar cambios de autenticación para cargar tema
+  firebase.auth().onAuthStateChanged(function(user) {
+        if (user) {
+            // Usuario autenticado: cargar tema desde Firebase
+            cargarTemaDesdeFirebase();
+        } else {
+            // Usuario no autenticado: usar localStorage
+            if (localStorage.getItem("theme") === "dark") {
+                body.classList.add("dark-mode");
+                if (themeStatus) {
+                    themeStatus.textContent = "Oscuro";
+                }
+            } else {
+                if (themeStatus) {
+                    themeStatus.textContent = "Claro";
+                }
+            }
         }
-    } else {
-        if (themeStatus) {
-            themeStatus.textContent = "Claro";
-        }
-    }
+    });
 
     if (toggleThemeBtn) {
         toggleThemeBtn.addEventListener("click", toggleDarkMode);
     }
 });
+// NUEVA FUNCIÓN: Cargar tema desde Firebase
+async function cargarTemaDesdeFirebase() {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    try {
+        const userDoc = await db.collection('usuarios').doc(user.uid).get();
+        if (userDoc.exists) {
+            const userData = userDoc.data();
+            const temaOscuro = userData.configuracion?.temaOscuro || false;
+            
+            // Aplicar el tema desde Firebase
+            if (temaOscuro) {
+                body.classList.add("dark-mode");
+                localStorage.setItem("theme", "dark");
+                if (themeStatus) {
+                    themeStatus.textContent = "Oscuro";
+                }
+            } else {
+                body.classList.remove("dark-mode");
+                localStorage.setItem("theme", "light");
+                if (themeStatus) {
+                    themeStatus.textContent = "Claro";
+                }
+            }
+            
+            console.log("Tema cargado desde Firebase:", temaOscuro ? "Oscuro" : "Claro");
+        }
+    } catch (error) {
+        console.error("Error al cargar tema desde Firebase:", error);
+    }
+}
+
+// FUNCIÓN ACTUALIZADA: Guardar tema en Firebase
+async function guardarTemaEnFirebase(temaOscuro) {
+    const user = firebase.auth().currentUser;
+    if (!user) return;
+
+    try {
+        await db.collection('usuarios').doc(user.uid).update({
+            'configuracion.temaOscuro': temaOscuro,
+            'estadisticas.ultimaActividad': firebase.firestore.FieldValue.serverTimestamp()
+        });
+        console.log("Tema guardado en Firebase:", temaOscuro ? "Oscuro" : "Claro");
+    } catch (error) {
+        console.error("Error al guardar tema en Firebase:", error);
+    }
+}
 // SISTEMA DE AVATAR CON FIREBASE - OPTIMIZADO Y CON NOMBRE DE USUARIO
 class AvatarManager {
     constructor() {
@@ -2270,3 +2537,1581 @@ function limpiarCacheAvatares() {
     avatarCache.clear();
     console.log("Cache de avatares limpiado");
 }
+// ===========================
+// SISTEMA DE BÚSQUEDA DE COMENTARIOS CORREGIDO
+// ===========================
+
+let todosLosComentarios = []; // Cache de todos los comentarios cargados
+let comentariosFiltrados = []; // Comentarios que coinciden con la búsqueda
+let todosLosUsuarios = []; // Cache de usuarios para búsqueda
+
+// ===========================
+// INICIALIZACIÓN DE BÚSQUEDA
+// ===========================
+function inicializarBusquedaComentarios() {
+    const searchInput = document.getElementById('search-comentarios');
+    if (!searchInput) {
+        console.log("Campo de búsqueda no encontrado, creando...");
+        crearCampoBusqueda();
+        return;
+    }
+
+    // Búsqueda en tiempo real con debounce
+    let timeoutId;
+    searchInput.addEventListener('input', (e) => {
+        clearTimeout(timeoutId);
+        const query = e.target.value.trim();
+        
+        // Debounce para evitar búsquedas excesivas
+        timeoutId = setTimeout(() => {
+            if (query.length > 0) {
+                buscarComentarios(query);
+            } else {
+                mostrarTodosLosComentarios();
+            }
+        }, 300);
+    });
+
+    // Limpiar búsqueda al presionar Escape
+    searchInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            e.target.value = '';
+            mostrarTodosLosComentarios();
+        }
+    });
+
+    console.log("✅ Sistema de búsqueda de comentarios inicializado");
+}
+
+// ===========================
+// CREAR CAMPO DE BÚSQUEDA CON ESTILOS
+// ===========================
+function crearCampoBusqueda() {
+    const cajaComentarios = document.querySelector('.caja_comentarios');
+    if (!cajaComentarios) return;
+
+    // Crear estilos CSS si no existen
+    if (!document.getElementById('search-styles')) {
+        const styles = document.createElement('style');
+        styles.id = 'search-styles';
+        styles.textContent = `
+            .search-comentarios-container {
+                margin-bottom: 15px;
+                width: 100%;
+            }
+            
+            .search-input-wrapper {
+                position: relative;
+                display: flex;
+                align-items: center;
+                background: #ffffff;
+                border: 2px solid #e1e5e9;
+                border-radius: 25px;
+                padding: 12px 20px;
+                transition: all 0.3s ease;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
+            
+            .search-input-wrapper:focus-within {
+                border-color: #4285f4;
+                box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+                transform: translateY(-1px);
+            }
+            
+            .search-icon {
+                color: #5f6368;
+                margin-right: 12px;
+                font-size: 18px;
+                transition: color 0.3s ease;
+            }
+            
+            .search-input-wrapper:focus-within .search-icon {
+                color: #4285f4;
+            }
+            
+            .search-comentarios-input {
+                flex: 1;
+                border: none;
+                background: transparent;
+                outline: none;
+                padding: 10px 0;
+                font-size: 16px;
+                color: #202124;
+                font-weight: 400;
+            }
+            
+            .search-comentarios-input::placeholder {
+                color: #5f6368;
+                font-weight: 400;
+            }
+            
+            .search-results-info {
+                margin: 15px 0;
+                padding: 15px 20px;
+                background: linear-gradient(135deg, #e8f0fe 0%, #f8f9ff 100%);
+                border-radius: 12px;
+                border-left: 4px solid #4285f4;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            }
+            
+            .results-summary {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                flex-wrap: wrap;
+                gap: 12px;
+            }
+            
+            .results-count {
+                color: #1a73e8;
+                font-weight: 500;
+                font-size: 15px;
+            }
+            
+            .btn-clear-search-comentarios {
+                background: linear-gradient(135deg, #ea4335 0%, #d33b2c 100%);
+                color: white;
+                border: none;
+                padding: 8px 16px;
+                border-radius: 20px;
+                cursor: pointer;
+                font-size: 13px;
+                font-weight: 500;
+                transition: all 0.2s ease;
+                box-shadow: 0 2px 4px rgba(234, 67, 53, 0.3);
+            }
+            
+            .btn-clear-search-comentarios:hover {
+                background: linear-gradient(135deg, #d33b2c 0%, #b52d20 100%);
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(234, 67, 53, 0.4);
+            }
+            
+            .no-results-comentarios {
+                text-align: center;
+                padding: 40px 20px;
+                color: #5f6368;
+            }
+            
+            .no-results-comentarios h3 {
+                margin-bottom: 12px;
+                color: #5f6368;
+                font-weight: 400;
+            }
+            
+            .search-highlight-comentarios {
+                background: linear-gradient(135deg, #fff59d 0%, #ffeb3b 100%);
+                color: #1a1a1a;
+                padding: 2px 6px;
+                border-radius: 4px;
+                font-weight: 600;
+                box-shadow: 0 1px 3px rgba(255, 235, 59, 0.4);
+            }
+            
+            .separador-respuestas {
+                margin: 20px 0;
+                padding: 15px;
+                background: #f1f3f4;
+                border-radius: 8px;
+                border-left: 4px solid #4caf50;
+            }
+            
+            .separador-respuestas h3 {
+                margin: 0;
+                color: #2e7d32;
+                font-size: 16px;
+            }
+            
+            .respuesta-con-contexto {
+                margin-bottom: 15px;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                overflow: hidden;
+            }
+            
+            .contexto-padre {
+                background: #f5f5f5;
+                padding: 8px 15px;
+                border-bottom: 1px solid #e0e0e0;
+            }
+            
+            .contexto-padre small {
+                color: #666;
+                font-style: italic;
+            }
+            
+            /* Modo oscuro */
+            body.dark-mode .search-input-wrapper {
+                background: #1f2937;
+                border-color: #374151;
+            }
+            
+            body.dark-mode .search-input-wrapper:focus-within {
+                border-color: #60a5fa;
+                box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+            }
+            
+            body.dark-mode .search-icon {
+                color: #9ca3af;
+            }
+            
+            body.dark-mode .search-input-wrapper:focus-within .search-icon {
+                color: #60a5fa;
+            }
+            
+            body.dark-mode .search-comentarios-input {
+                color: #f9fafb;
+            }
+            
+            body.dark-mode .search-comentarios-input::placeholder {
+                color: #9ca3af;
+            }
+            
+            body.dark-mode .search-results-info {
+                background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+                border-left-color: #60a5fa;
+            }
+            
+            body.dark-mode .results-count {
+                color: #93c5fd;
+            }
+            
+            body.dark-mode .btn-clear-search-comentarios {
+                background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+                box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+            }
+            
+            body.dark-mode .btn-clear-search-comentarios:hover {
+                background: linear-gradient(135deg, #b91c1c 0%, #991b1b 100%);
+                box-shadow: 0 4px 8px rgba(220, 38, 38, 0.4);
+            }
+            
+            body.dark-mode .no-results-comentarios {
+                color: #9ca3af;
+            }
+            
+            body.dark-mode .no-results-comentarios h3 {
+                color: #9ca3af;
+            }
+            
+            body.dark-mode .search-highlight-comentarios {
+                background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+                color: #1f2937;
+                box-shadow: 0 1px 3px rgba(251, 191, 36, 0.4);
+            }
+        `;
+        document.head.appendChild(styles);
+    }
+
+    // Crear contenedor de búsqueda
+    const searchContainer = document.createElement('div');
+    searchContainer.className = 'search-comentarios-container';
+    searchContainer.innerHTML = `
+        <div class="search-input-wrapper">
+            <i class="fas fa-search search-icon"></i>
+            <input 
+                type="text" 
+                id="search-comentarios" 
+                placeholder="Buscar comentarios o usuarios..." 
+                class="search-comentarios-input"
+            >
+        </div>
+        <div id="search-results-info" class="search-results-info" style="display: none;"></div>
+    `;
+
+    // Insertar antes del textarea
+    const textarea = cajaComentarios.querySelector('textarea');
+    cajaComentarios.insertBefore(searchContainer, textarea);
+
+    // Configurar eventos después de crear
+    setTimeout(() => {
+        inicializarBusquedaComentarios();
+    }, 100);
+}
+
+// ===========================
+// CONFIGURAR BOTÓN LIMPIAR - REMOVIDO
+// ===========================
+// Ya no necesitamos esta función
+
+// ===========================
+// CARGAR COMENTARIOS CON CACHE
+// ===========================
+async function cargarComentariosConCache() {
+    if (!db) {
+        console.error("Firestore no disponible");
+        return;
+    }
+
+    try {
+        console.log("🔄 Cargando comentarios para búsqueda...");
+        
+        // Cargar comentarios
+        const comentariosSnapshot = await db.collection('comentarios')
+            .where('activo', '==', true)
+            .orderBy('timestamp', 'desc')
+            .get();
+
+        // Cargar respuestas
+        const respuestasSnapshot = await db.collection('respuestas')
+            .where('activo', '==', true)
+            .orderBy('timestamp', 'asc')
+            .get();
+
+        // Procesar comentarios
+        const comentarios = comentariosSnapshot.docs.map(doc => ({
+            id: doc.id,
+            tipo: 'comentario',
+            ...doc.data()
+        }));
+
+        // Procesar respuestas
+        const respuestas = respuestasSnapshot.docs.map(doc => ({
+            id: doc.id,
+            tipo: 'respuesta',
+            ...doc.data()
+        }));
+
+        // Combinar y guardar en cache
+        todosLosComentarios = [...comentarios, ...respuestas];
+        
+        // Extraer usuarios únicos
+        const usuariosUnicos = new Set();
+        todosLosComentarios.forEach(item => {
+            if (item.usuario) {
+                usuariosUnicos.add(item.usuario.toLowerCase());
+            }
+        });
+        todosLosUsuarios = Array.from(usuariosUnicos);
+
+        console.log(`📝 ${comentarios.length} comentarios y ${respuestas.length} respuestas cargados`);
+        console.log(`👥 ${todosLosUsuarios.length} usuarios únicos encontrados`);
+
+    } catch (error) {
+        console.error("Error cargando comentarios para búsqueda:", error);
+    }
+}
+
+// ===========================
+// FUNCIÓN PRINCIPAL DE BÚSQUEDA
+// ===========================
+function buscarComentarios(query) {
+    if (!todosLosComentarios.length) {
+        console.log("No hay comentarios cargados, cargando...");
+        cargarComentariosConCache().then(() => {
+            if (query.trim()) buscarComentarios(query);
+        });
+        return;
+    }
+
+    const queryLower = query.toLowerCase();
+    
+    comentariosFiltrados = todosLosComentarios.filter(item => {
+        // Buscar en contenido del comentario/respuesta
+        const contenidoMatch = (item.texto || '').toLowerCase().includes(queryLower);
+        
+        // Buscar en nombre de usuario
+        const usuarioMatch = (item.usuario || '').toLowerCase().includes(queryLower);
+        
+        return contenidoMatch || usuarioMatch;
+    });
+
+    // Ordenar resultados: comentarios primero, luego respuestas
+    comentariosFiltrados.sort((a, b) => {
+        if (a.tipo === 'comentario' && b.tipo === 'respuesta') return -1;
+        if (a.tipo === 'respuesta' && b.tipo === 'comentario') return 1;
+        
+        // Dentro del mismo tipo, ordenar por timestamp
+        const fechaA = a.timestamp?.toDate() || new Date(0);
+        const fechaB = b.timestamp?.toDate() || new Date(0);
+        return fechaB - fechaA;
+    });
+
+    mostrarResultadosBusquedaComentarios(comentariosFiltrados, query);
+}
+
+// ===========================
+// MOSTRAR RESULTADOS DE BÚSQUEDA
+// ===========================
+function mostrarResultadosBusquedaComentarios(comentarios, query) {
+    const listaComentarios = document.getElementById('lista_comentarios');
+    const resultadosInfo = document.getElementById('search-results-info');
+    
+    if (!listaComentarios) return;
+
+    // Mostrar información de resultados
+    if (resultadosInfo) {
+        resultadosInfo.style.display = 'block';
+        
+        if (comentarios.length === 0) {
+            resultadosInfo.innerHTML = `
+                <div class="no-results-comentarios">
+                    <h3>🔍 No se encontraron resultados</h3>
+                    <p>No hay comentarios que coincidan con "<strong>${escapeHtml(query)}</strong>"</p>
+                    <button onclick="limpiarBusquedaComentarios()" class="btn-clear-search-comentarios">
+                        <i class="fas fa-times"></i> Limpiar búsqueda
+                    </button>
+                </div>
+            `;
+            listaComentarios.innerHTML = '';
+            return;
+        }
+
+        const comentariosCount = comentarios.filter(c => c.tipo === 'comentario').length;
+        const respuestasCount = comentarios.filter(c => c.tipo === 'respuesta').length;
+        
+        resultadosInfo.innerHTML = `
+            <div class="results-summary">
+                <div class="results-count">
+                    📋 ${comentarios.length} resultado${comentarios.length !== 1 ? 's' : ''} para "<strong>${escapeHtml(query)}</strong>"
+                </div>
+                <button onclick="limpiarBusquedaComentarios()" class="btn-clear-search-comentarios">
+                    <i class="fas fa-times"></i> Limpiar
+                </button>
+            </div>
+        `;
+    }
+
+    // Renderizar comentarios con resaltado
+    renderizarComentariosFiltrados(comentarios, query);
+}
+
+// ===========================
+// RENDERIZAR COMENTARIOS FILTRADOS
+// ===========================
+async function renderizarComentariosFiltrados(comentarios, query) {
+    const listaComentarios = document.getElementById('lista_comentarios');
+    if (!listaComentarios) return;
+
+    listaComentarios.innerHTML = '';
+
+    // Agrupar por comentarios principales
+    const comentariosPrincipales = comentarios.filter(c => c.tipo === 'comentario');
+    const respuestas = comentarios.filter(c => c.tipo === 'respuesta');
+
+    // Renderizar comentarios principales
+    for (const comentario of comentariosPrincipales) {
+        // ✅ CREAR COPIA SEPARADA PARA RENDERIZADO
+        const comentarioParaRenderizar = { ...comentario };
+        
+        // Solo aplicar resaltado en el DOM, no modificar el objeto original
+        const elementoComentario = await crearElementoEntradaBusqueda(comentarioParaRenderizar, "comentario", 0, query);
+        listaComentarios.appendChild(elementoComentario);
+    }
+
+    // Renderizar respuestas sueltas (que coinciden pero su comentario padre no)
+    const respuestasSueltas = respuestas.filter(respuesta => {
+        return !comentariosPrincipales.some(com => com.id === respuesta.comentarioId);
+    });
+
+    if (respuestasSueltas.length > 0) {
+        // Cargar comentarios padre para contexto (sin separador)
+        for (const respuesta of respuestasSueltas) {
+            try {
+                const comentarioPadre = await obtenerComentarioPadre(respuesta.comentarioId);
+                if (comentarioPadre) {
+                    const contenedorRespuesta = document.createElement('div');
+                    contenedorRespuesta.className = 'respuesta-con-contexto';
+
+                    const respuestaParaRenderizar = { ...respuesta };
+                    const elementoRespuesta = await crearElementoEntradaBusqueda(respuestaParaRenderizar, "respuesta", 1, query);
+                    contenedorRespuesta.appendChild(elementoRespuesta);
+                    listaComentarios.appendChild(contenedorRespuesta);
+                }
+            } catch (error) {
+                console.warn("Error cargando contexto para respuesta:", respuesta.id, error);
+            }
+        }
+    }
+}
+
+// ===========================
+// CREAR ELEMENTO PARA BÚSQUEDA - CORREGIDO
+// ===========================
+async function crearElementoEntradaBusqueda(data, tipo, profundidad = 0, query = '') {
+    // Usar la función original pero aplicar resaltado después
+    const elemento = await crearElementoEntrada(data, tipo, profundidad);
+    
+    if (query && elemento) {
+        // ✅ APLICAR RESALTADO DESPUÉS DE CREAR EL ELEMENTO
+        aplicarResaltadoBusqueda(elemento, query);
+    }
+    
+    return elemento;
+}
+
+// ===========================
+// APLICAR RESALTADO EN EL DOM - NUEVA FUNCIÓN
+// ===========================
+function aplicarResaltadoBusqueda(elemento, query) {
+    if (!query || !elemento) return;
+    
+    // Crear regex para búsqueda case-insensitive
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    
+    // Elementos donde aplicar resaltado
+    const selectores = [
+        '.nombre-usuario',    // Nombre de usuario
+        'p',                  // Texto del comentario/respuesta
+        '.cabecera-entrada span' // Otros textos en cabecera
+    ];
+    
+    selectores.forEach(selector => {
+        const elementos = elemento.querySelectorAll(selector);
+        elementos.forEach(el => {
+            // Solo procesar elementos de texto, no imágenes u otros
+            if (el.children.length === 0) {
+                const textoOriginal = el.textContent;
+                if (textoOriginal && regex.test(textoOriginal)) {
+                    el.innerHTML = textoOriginal.replace(regex, '<mark class="search-highlight-comentarios">$1</mark>');
+                }
+            } else {
+                // Para elementos con hijos, procesar solo nodos de texto
+                procesarNodosTexto(el, regex);
+            }
+        });
+    });
+}
+
+// ===========================
+// PROCESAR NODOS DE TEXTO RECURSIVAMENTE
+// ===========================
+function procesarNodosTexto(elemento, regex) {
+    // Obtener todos los nodos hijo
+    const nodos = Array.from(elemento.childNodes);
+    
+    nodos.forEach(nodo => {
+        if (nodo.nodeType === Node.TEXT_NODE) {
+            // Es un nodo de texto
+            const texto = nodo.textContent;
+            if (regex.test(texto)) {
+                // Crear un span temporal para insertar el HTML
+                const span = document.createElement('span');
+                span.innerHTML = texto.replace(regex, '<mark class="search-highlight-comentarios">$1</mark>');
+                
+                // Reemplazar el nodo de texto con el contenido del span
+                while (span.firstChild) {
+                    elemento.insertBefore(span.firstChild, nodo);
+                }
+                elemento.removeChild(nodo);
+            }
+        } else if (nodo.nodeType === Node.ELEMENT_NODE && 
+                   !nodo.classList.contains('search-highlight-comentarios')) {
+            // Es un elemento, procesar recursivamente (pero no los highlights existentes)
+            procesarNodosTexto(nodo, regex);
+        }
+    });
+}
+
+// ===========================
+// FUNCIONES AUXILIARES
+// ===========================
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function truncarTexto(texto, limite = 100) {
+    if (!texto) return 'Sin contenido';
+    if (texto.length <= limite) return texto;
+    return texto.substring(0, limite) + '...';
+}
+
+async function obtenerComentarioPadre(comentarioId) {
+    try {
+        const doc = await db.collection('comentarios').doc(comentarioId).get();
+        return doc.exists ? { id: doc.id, ...doc.data() } : null;
+    } catch (error) {
+        console.error("Error obteniendo comentario padre:", error);
+        return null;
+    }
+}
+
+// ===========================
+// LIMPIAR BÚSQUEDA
+// ===========================
+function limpiarBusquedaComentarios() {
+    const searchInput = document.getElementById('search-comentarios');
+    const resultadosInfo = document.getElementById('search-results-info');
+    
+    if (searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+    }
+    
+    if (resultadosInfo) {
+        resultadosInfo.style.display = 'none';
+    }
+    
+    mostrarTodosLosComentarios();
+}
+
+// ===========================
+// MOSTRAR TODOS LOS COMENTARIOS
+// ===========================
+function mostrarTodosLosComentarios() {
+    // Recargar comentarios normalmente
+    if (typeof cargarComentarios === 'function') {
+        cargarComentarios();
+    }
+}
+
+// ===========================
+// INICIALIZACIÓN AUTOMÁTICA
+// ===========================
+document.addEventListener('DOMContentLoaded', function() {
+    console.log("🚀 Iniciando sistema de búsqueda de comentarios corregido...");
+    
+    // Esperar a que Firebase esté listo
+    const inicializarCuandoEsteList = () => {
+        if (typeof auth !== 'undefined' && auth && auth.currentUser) {
+            setTimeout(() => {
+                inicializarBusquedaComentarios();
+                
+                // Cargar cache inicial
+                cargarComentariosConCache();
+            }, 1000);
+        } else {
+            setTimeout(inicializarCuandoEsteList, 500);
+        }
+    };
+    
+    inicializarCuandoEsteList();
+});
+
+// ===========================
+// ACTUALIZAR CACHE AUTOMÁTICAMENTE
+// ===========================
+// Interceptar la función original para actualizar cache
+if (typeof window.cargarComentarios === 'function') {
+    const cargarComentariosOriginal = window.cargarComentarios;
+    window.cargarComentarios = async function() {
+        // Llamar función original
+        await cargarComentariosOriginal.apply(this, arguments);
+        
+        // Actualizar cache para búsqueda
+        setTimeout(() => {
+            cargarComentariosConCache();
+        }, 500);
+    };
+}
+
+// ===========================
+// EXPONER FUNCIONES GLOBALMENTE
+// ===========================
+window.limpiarBusquedaComentarios = limpiarBusquedaComentarios;
+window.buscarComentarios = buscarComentarios;
+window.inicializarBusquedaComentarios = inicializarBusquedaComentarios;
+window.cargarComentariosConCache = cargarComentariosConCache;
+
+console.log("✅ Sistema de búsqueda de comentarios corregido cargado");
+// Variables globales para el sistema de reportes
+let reporteModalActivo = null;
+let usuarioReportado = null;
+let reportesBloqueados = new Set(); // Para evitar duplicados
+
+/* ============================
+   INICIALIZACIÓN DEL SISTEMA DE REPORTES
+   ============================ */
+function inicializarSistemaReportes() {
+    console.log("🚨 Inicializando sistema de reportes corregido...");
+    
+    // Verificar que no esté ya inicializado
+    if (document.getElementById('modal-reportes')) {
+        console.log("⚠️ Sistema de reportes ya inicializado");
+        return;
+    }
+    
+    // Agregar estilos CSS
+    agregarEstilosReportes();
+    
+    // Crear modal de reportes
+    crearModalReportes();
+    
+    // Configurar eventos
+    configurarEventosReportes();
+    
+    console.log("✅ Sistema de reportes inicializado correctamente");
+}
+
+/* ============================
+   AGREGAR ESTILOS CSS CORREGIDOS
+   ============================ */
+function agregarEstilosReportes() {
+    if (document.getElementById('estilos-reportes')) return;
+    
+    const estilos = document.createElement('style');
+    estilos.id = 'estilos-reportes';
+    estilos.textContent = `
+        /* Botón de reportar - ÚNICO por comentario */
+        .btn-reportar {
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            margin-top: 8px;
+            box-shadow: 0 1px 3px rgba(255, 107, 53, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .btn-reportar:hover {
+            background: linear-gradient(135deg, #e55a2e, #ff7a35);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(255, 107, 53, 0.4);
+        }
+        
+        .btn-reportar:active {
+            transform: translateY(0);
+        }
+        
+        /* Evitar múltiples botones */
+        .comentario .btn-reportar:not(:first-of-type),
+        .respuesta .btn-reportar:not(:first-of-type) {
+            display: none !important;
+        }
+        
+        /* Modal de reportes */
+        .modal-reportes {
+            display: none;
+            position: fixed;
+            z-index: 1200;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .modal-reportes.activo {
+            display: flex;
+        }
+        
+        .modal-contenido-reportes {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 16px;
+            padding: 25px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            animation: modalSlideIn 0.3s ease;
+            position: relative;
+            color: #2d3436;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes modalSlideIn {
+            from { 
+                opacity: 0; 
+                transform: scale(0.8) translateY(-20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: scale(1) translateY(0); 
+            }
+        }
+        
+        .modal-header-reportes {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 107, 53, 0.2);
+        }
+        
+        .modal-avatar-reportes {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background-color: #ddd;
+            margin-right: 12px;
+            object-fit: cover;
+            border: 2px solid #ff6b35;
+        }
+        
+        .modal-usuario-info-reportes {
+            text-align: left;
+            flex: 1;
+        }
+        
+        .modal-usuario-nombre-reportes {
+            font-weight: bold;
+            color: #2d3436;
+            margin-bottom: 3px;
+            font-size: 15px;
+        }
+        
+        .modal-usuario-accion-reportes {
+            font-size: 13px;
+            color: #636e72;
+        }
+        
+        .modal-cerrar-reportes {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 20px;
+            color: #636e72;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            width: 25px;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-cerrar-reportes:hover {
+            color: #ff6b35;
+            background-color: rgba(255, 107, 53, 0.1);
+            border-radius: 50%;
+        }
+        
+        .modal-titulo-reportes {
+            color: #2d3436;
+            margin-bottom: 18px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .modal-opciones-reportes {
+            margin: 15px 0;
+            text-align: left;
+        }
+        
+        .opcion-reporte {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            margin: 8px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: #2d3436;
+            font-size: 14px;
+        }
+        
+        .opcion-reporte:hover {
+            background: #fff5f3;
+            border-color: #ff6b35;
+            transform: translateX(3px);
+            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.2);
+        }
+        
+        .opcion-reporte.seleccionada {
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            color: white;
+            border-color: #ff6b35;
+            box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.3);
+        }
+        
+        .opcion-reporte .emoji {
+            margin-right: 8px;
+            font-size: 14px;
+        }
+        
+        .modal-botones-reportes {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        
+        .btn-reportes {
+            flex: 1;
+            padding: 10px 18px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+        
+        .btn-cancelar-reportes {
+            background: #e9ecef;
+            color: #6c757d;
+            border: 1px solid #dee2e6;
+        }
+        
+        .btn-cancelar-reportes:hover {
+            background: #dee2e6;
+            color: #495057;
+        }
+        
+        .btn-confirmar-reportes {
+            background: linear-gradient(135deg, #ff6b35, #ff8c42);
+            color: white;
+            box-shadow: 0 2px 8px rgba(255, 107, 53, 0.3);
+        }
+        
+        .btn-confirmar-reportes:hover:not(:disabled) {
+            background: linear-gradient(135deg, #e55a2e, #ff7a35);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.4);
+        }
+        
+        .btn-confirmar-reportes:disabled {
+            background: #adb5bd;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        /* Estado de reporte enviado */
+        .reporte-enviado {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .reporte-enviado::after {
+            content: "✓ Reportado";
+            position: absolute;
+            top: 0;
+            right: 0;
+            background: #28a745;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 10px;
+            transform: translate(50%, -50%);
+        }
+        
+        /* Modo oscuro */
+        .dark-mode .modal-contenido-reportes {
+            background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
+            color: #ddd;
+        }
+        
+        .dark-mode .modal-usuario-nombre-reportes {
+            color: #fff;
+        }
+        
+        .dark-mode .modal-usuario-accion-reportes {
+            color: #b2bec3;
+        }
+        
+        .dark-mode .modal-titulo-reportes {
+            color: #fff;
+        }
+        
+        .dark-mode .opcion-reporte {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: #636e72;
+            color: #ddd;
+        }
+        
+        .dark-mode .opcion-reporte:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: #ff6b35;
+        }
+        
+        .dark-mode .btn-cancelar-reportes {
+            background: #636e72;
+            color: #ddd;
+            border-color: #2d3436;
+        }
+        
+        .dark-mode .btn-cancelar-reportes:hover {
+            background: #2d3436;
+            color: #fff;
+        }
+        
+        /* Responsive */
+        @media (max-width: 480px) {
+            .modal-contenido-reportes {
+                padding: 20px;
+                max-width: 95%;
+            }
+            
+            .modal-header-reportes {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .modal-avatar-reportes {
+                margin: 0 0 8px 0;
+            }
+            
+            .modal-botones-reportes {
+                flex-direction: column;
+            }
+            
+            .btn-reportar {
+                font-size: 10px;
+                padding: 4px 8px;
+            }
+        }
+    `;
+    
+    document.head.appendChild(estilos);
+}
+
+/* ============================
+   CREAR MODAL DE REPORTES CORREGIDO
+   ============================ */
+function crearModalReportes() {
+    if (document.getElementById('modal-reportes')) return;
+    
+    const modal = document.createElement('div');
+    modal.id = 'modal-reportes';
+    modal.className = 'modal-reportes';
+    modal.innerHTML = `
+        <div class="modal-contenido-reportes">
+            <button class="modal-cerrar-reportes" onclick="cerrarModalReportes()">&times;</button>
+            
+            <div class="modal-header-reportes">
+                <img class="modal-avatar-reportes" id="reporte-avatar" src="/Imagenes/Avatares/Avatar1.jpg" alt="Avatar">
+                <div class="modal-usuario-info-reportes">
+                    <div class="modal-usuario-nombre-reportes" id="reporte-nombre">Usuario</div>
+                    <div class="modal-usuario-accion-reportes">Reportar contenido</div>
+                </div>
+            </div>
+            
+            <h3 class="modal-titulo-reportes">¿Por qué reportas este contenido?</h3>
+            
+            <div class="modal-opciones-reportes" id="opciones-reporte">
+                <div class="opcion-reporte" data-razon="spam">
+                    <span class="emoji">📢</span> Spam o contenido repetitivo
+                </div>
+                <div class="opcion-reporte" data-razon="acoso">
+                    <span class="emoji">😠</span> Acoso o intimidación
+                </div>
+                <div class="opcion-reporte" data-razon="contenido">
+                    <span class="emoji">🚫</span> Contenido inapropiado
+                </div>
+                <div class="opcion-reporte" data-razon="lenguaje">
+                    <span class="emoji">🤬</span> Lenguaje ofensivo
+                </div>
+                <div class="opcion-reporte" data-razon="otro">
+                    <span class="emoji">❓</span> Otro motivo
+                </div>
+            </div>
+            
+            <div class="modal-botones-reportes">
+                <button class="btn-reportes btn-cancelar-reportes" onclick="cerrarModalReportes()">
+                    Cancelar
+                </button>
+                <button class="btn-reportes btn-confirmar-reportes" id="btn-confirmar-reporte" disabled onclick="enviarReporte()">
+                    Reportar
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+/* ============================
+   CONFIGURAR EVENTOS CORREGIDOS
+   ============================ */
+function configurarEventosReportes() {
+    // Configurar eventos de opciones de reporte
+    document.addEventListener('click', (e) => {
+        if (e.target.matches('.opcion-reporte') || e.target.closest('.opcion-reporte')) {
+            const opcion = e.target.closest('.opcion-reporte') || e.target;
+            
+            // Deseleccionar todas las opciones
+            document.querySelectorAll('.opcion-reporte').forEach(opt => {
+                opt.classList.remove('seleccionada');
+            });
+            
+            // Seleccionar la opción clickeada
+            opcion.classList.add('seleccionada');
+            
+            // Habilitar botón de confirmar
+            const btnConfirmar = document.getElementById('btn-confirmar-reporte');
+            if (btnConfirmar) {
+                btnConfirmar.disabled = false;
+            }
+        }
+    });
+    
+    // Cerrar modal con Escape
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            cerrarModalReportes();
+        }
+    });
+    
+    // Cerrar modal al hacer click fuera
+    document.addEventListener('click', (e) => {
+        const modal = document.getElementById('modal-reportes');
+        if (e.target === modal) {
+            cerrarModalReportes();
+        }
+    });
+}
+
+/* ============================
+   FUNCIONES DEL MODAL CORREGIDAS
+   ============================ */
+function abrirModalReportes(uid, nombre, avatar, tipoContenido = 'comentario', contenidoId = null) {
+    if (!auth || !auth.currentUser) {
+        mostrarVentanaEmergente("Debes iniciar sesión para reportar contenido.");
+        return;
+    }
+    
+    // Verificar que no sea el usuario actual
+    if (uid === auth.currentUser.uid) {
+        mostrarVentanaEmergente("No puedes reportar tu propio contenido.");
+        return;
+    }
+    
+    // Crear clave única para evitar reportes duplicados
+    const claveReporte = `${uid}-${contenidoId}-${auth.currentUser.uid}`;
+    if (reportesBloqueados.has(claveReporte)) {
+        mostrarVentanaEmergente("Ya has reportado este contenido anteriormente.");
+        return;
+    }
+    
+    usuarioReportado = { 
+        uid, 
+        nombre, 
+        avatar: verificarYCorregirAvatar(avatar),
+        tipoContenido,
+        contenidoId,
+        claveReporte
+    };
+    
+    // Actualizar datos en el modal
+    document.getElementById('reporte-nombre').textContent = nombre;
+    
+    // Configurar avatar con manejo de errores
+    const avatarImg = document.getElementById('reporte-avatar');
+    aplicarAvatarSeguro(avatarImg, usuarioReportado.avatar, `Avatar de ${nombre}`);
+    
+    // Resetear selección
+    document.querySelectorAll('.opcion-reporte').forEach(opcion => {
+        opcion.classList.remove('seleccionada');
+    });
+    document.getElementById('btn-confirmar-reporte').disabled = true;
+    
+    // Mostrar modal
+    document.getElementById('modal-reportes').classList.add('activo');
+    console.log("🚨 Modal de reportes abierto para:", nombre);
+}
+
+function cerrarModalReportes() {
+    const modal = document.getElementById('modal-reportes');
+    if (modal) {
+        modal.classList.remove('activo');
+    }
+    usuarioReportado = null;
+    console.log("❌ Modal de reportes cerrado");
+}
+
+async function enviarReporte() {
+    if (!usuarioReportado || !auth || !auth.currentUser) return;
+    
+    const razonSeleccionada = document.querySelector('.opcion-reporte.seleccionada');
+    if (!razonSeleccionada) return;
+    
+    const razon = razonSeleccionada.dataset.razon;
+    const btnConfirmar = document.getElementById('btn-confirmar-reporte');
+    
+    try {
+        // Deshabilitar botón para evitar múltiples envíos
+        btnConfirmar.disabled = true;
+        btnConfirmar.textContent = 'Enviando...';
+        
+        // Verificar permisos de Firebase antes de enviar
+        if (!db) {
+            throw new Error('Base de datos no disponible');
+        }
+        
+        // Verificar si ya existe un reporte similar
+        const reportesExistentes = await db.collection('reportes')
+            .where('reportadoPor', '==', auth.currentUser.uid)
+            .where('usuarioReportado', '==', usuarioReportado.uid)
+            .where('contenidoId', '==', usuarioReportado.contenidoId)
+            .get();
+        
+        if (!reportesExistentes.empty) {
+            mostrarVentanaEmergente("Ya has reportado este contenido anteriormente.");
+            cerrarModalReportes();
+            return;
+        }
+        
+        // Preparar datos del reporte
+        const reporteData = {
+            reportadoPor: auth.currentUser.uid,
+            reportadorNombre: auth.currentUser.displayName || auth.currentUser.email.split('@')[0],
+            usuarioReportado: usuarioReportado.uid,
+            nombreReportado: usuarioReportado.nombre,
+            tipoContenido: usuarioReportado.tipoContenido,
+            contenidoId: usuarioReportado.contenidoId || 'sin-id',
+            razon: razon,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            fecha: new Date().toISOString(),
+            estado: 'pendiente',
+            revisado: false
+        };
+        
+        // Intentar guardar en Firebase
+        await db.collection('reportes').add(reporteData);
+        
+        // Marcar como reportado para evitar duplicados
+        reportesBloqueados.add(usuarioReportado.claveReporte);
+        
+        // Marcar visualmente el contenido como reportado
+        marcarContenidoReportado(usuarioReportado.contenidoId);
+        
+        console.log(`✅ Reporte enviado: ${usuarioReportado.nombre} por ${razon}`);
+        mostrarVentanaEmergente(`Reporte enviado correctamente. Gracias por ayudar a mantener la comunidad segura.`);
+        
+        cerrarModalReportes();
+        
+    } catch (error) {
+        console.error('Error al enviar reporte:', error);
+        
+        // Mensaje de error más específico
+        let mensajeError = 'Error al enviar el reporte. ';
+        if (error.code === 'permission-denied') {
+            mensajeError += 'No tienes permisos para realizar esta acción.';
+        } else if (error.code === 'unavailable') {
+            mensajeError += 'Servicio no disponible. Inténtalo más tarde.';
+        } else {
+            mensajeError += 'Inténtalo de nuevo.';
+        }
+        
+        mostrarVentanaEmergente(mensajeError);
+        
+        // Restaurar botón
+        btnConfirmar.disabled = false;
+        btnConfirmar.textContent = 'Reportar';
+    }
+}
+
+/* ============================
+   FUNCIONES DE UTILIDAD CORREGIDAS
+   ============================ */
+function marcarContenidoReportado(contenidoId) {
+    if (!contenidoId) return;
+    
+    const elemento = document.querySelector(`[data-id="${contenidoId}"]`);
+    if (elemento) {
+        const botonReportar = elemento.querySelector('.btn-reportar');
+        if (botonReportar) {
+            botonReportar.textContent = '✓ Reportado';
+            botonReportar.disabled = true;
+            botonReportar.style.background = '#28a745';
+            botonReportar.onclick = null;
+        }
+    }
+}
+
+// FUNCIÓN CORREGIDA para agregar botones sin duplicados
+function agregarBotonReportar(contenedor, data, tipo) {
+    // Verificaciones de seguridad
+    if (!contenedor || !data || !data.uid) return;
+    if (!auth || !auth.currentUser || data.uid === auth.currentUser.uid) return;
+    
+    // Verificar si ya existe un botón de reportar
+    if (contenedor.querySelector('.btn-reportar')) {
+        console.log("⚠️ Botón de reportar ya existe, saltando...");
+        return;
+    }
+    
+    // Crear botón de reportar
+    const btnReportar = document.createElement('button');
+    btnReportar.className = 'btn-reportar';
+    btnReportar.innerHTML = '🚨 Reportar';
+    btnReportar.title = `Reportar ${tipo}`;
+    
+    btnReportar.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        abrirModalReportes(
+            data.uid,
+            data.usuario || 'Usuario',
+            data.avatar,
+            tipo,
+            data.id
+        );
+    };
+    
+    // Insertar después de las reacciones o al final
+    const reacciones = contenedor.querySelector('.reacciones');
+    if (reacciones) {
+        reacciones.parentNode.insertBefore(btnReportar, reacciones.nextSibling);
+    } else {
+        contenedor.appendChild(btnReportar);
+    }
+    
+    console.log(`✅ Botón de reportar agregado a ${tipo} de ${data.usuario}`);
+}
+
+/* ============================
+   INICIALIZACIÓN AUTOMÁTICA CORREGIDA
+   ============================ */
+document.addEventListener('DOMContentLoaded', () => {
+    // Esperar a que Firebase esté listo
+    const inicializar = () => {
+        if (typeof auth !== 'undefined' && auth) {
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    setTimeout(() => {
+                        inicializarSistemaReportes();
+                    }, 1000);
+                }
+            });
+        } else {
+            setTimeout(inicializar, 500);
+        }
+    };
+    
+    inicializar();
+});
+
+/* ============================
+   EXPONER FUNCIONES GLOBALMENTE
+   ============================ */
+window.abrirModalReportes = abrirModalReportes;
+window.cerrarModalReportes = cerrarModalReportes;
+window.enviarReporte = enviarReporte;
+window.agregarBotonReportar = agregarBotonReportar;
+window.marcarContenidoReportado = marcarContenidoReportado;
+
+console.log("✅ Sistema de reportes corregido cargado");
+/* ============================
+   INTEGRACIÓN CORREGIDA SISTEMA DE REPORTES
+   Agregar este código al FINAL de pagina_principal_Coemntarios_Beta.js
+   ============================ */
+
+// Variable para evitar múltiples integraciones
+let sistemaReportesIntegrado = false;
+
+// Función mejorada para agregar botones sin duplicados
+function agregarBotonReportarSeguro(contenedor, data, tipo) {
+    // Verificaciones exhaustivas
+    if (!contenedor || !data || !data.uid) return;
+    if (!auth || !auth.currentUser || data.uid === auth.currentUser.uid) return;
+    
+    // Verificar si ya existe botón
+    if (contenedor.querySelector('.btn-reportar')) return;
+    
+    // Verificar que el sistema de reportes esté cargado
+    if (typeof agregarBotonReportar !== 'function') {
+        console.log("⚠️ Sistema de reportes no disponible");
+        return;
+    }
+    
+    // Llamar función del sistema de reportes
+    agregarBotonReportar(contenedor, data, tipo);
+}
+
+// Interceptar función original una sola vez
+if (!sistemaReportesIntegrado && typeof window.crearElementoEntrada === 'function') {
+    console.log("🔧 Integrando sistema de reportes (versión corregida)...");
+    
+    // Guardar referencia original
+    const crearElementoEntradaOriginal = window.crearElementoEntrada;
+    
+    // Sobrescribir función
+    window.crearElementoEntrada = async function(data, tipo, profundidad = 0) {
+        // Llamar función original
+        const elemento = await crearElementoEntradaOriginal.call(this, data, tipo, profundidad);
+        
+        // Agregar botón de reportar después de un pequeño delay
+        if (elemento && data.uid) {
+            setTimeout(() => {
+                agregarBotonReportarSeguro(elemento, data, tipo);
+            }, 200);
+        }
+        
+        return elemento;
+    };
+    
+    sistemaReportesIntegrado = true;
+    console.log("✅ Sistema de reportes integrado correctamente");
+}
+
+// Función para actualizar comentarios existentes (mejorada)
+function actualizarComentariosConReportesSeguro() {
+    if (!auth || !auth.currentUser) return;
+    
+    const comentarios = document.querySelectorAll('.comentario[data-uid], .respuesta[data-uid]');
+    let agregados = 0;
+    
+    comentarios.forEach(comentario => {
+        // Verificar múltiples condiciones
+        const tieneBoton = comentario.querySelector('.btn-reportar');
+        const uid = comentario.dataset.uid;
+        const esPropio = uid === auth.currentUser.uid;
+        
+        if (!tieneBoton && !esPropio && uid) {
+            const userData = {
+                uid: uid,
+                usuario: comentario.querySelector('.nombre-usuario')?.textContent || 'Usuario',
+                avatar: comentario.querySelector('.avatar-comentario')?.src || '/Imagenes/Avatares/Avatar1.jpg',
+                id: comentario.dataset.id || `temp-${Math.random().toString(36).substr(2, 9)}`
+            };
+            
+            const tipo = comentario.classList.contains('comentario') ? 'comentario' : 'respuesta';
+            
+            agregarBotonReportarSeguro(comentario, userData, tipo);
+            agregados++;
+        }
+    });
+    
+    if (agregados > 0) {
+        console.log(`✅ ${agregados} botones de reporte agregados (sin duplicados)`);
+    }
+}
+
+// Configurar observador mejorado
+function configurarObservadorReportesSeguro() {
+    const listaComentarios = document.getElementById('lista_comentarios');
+    if (!listaComentarios) return;
+    
+    let timeoutId;
+    
+    const observer = new MutationObserver((mutations) => {
+        // Usar debounce para evitar múltiples llamadas
+        clearTimeout(timeoutId);
+        
+        let hayNuevosComentarios = false;
+        
+        mutations.forEach((mutation) => {
+            if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === Node.ELEMENT_NODE && 
+                        (node.classList?.contains('comentario') || node.classList?.contains('respuesta'))) {
+                        hayNuevosComentarios = true;
+                    }
+                });
+            }
+        });
+        
+        if (hayNuevosComentarios) {
+            timeoutId = setTimeout(() => {
+                actualizarComentariosConReportesSeguro();
+            }, 300);
+        }
+    });
+    
+    observer.observe(listaComentarios, {
+        childList: true,
+        subtree: true
+    });
+    
+    // Guardar referencia para poder limpiar después
+    window.observadorReportes = observer;
+    
+    console.log("👁️ Observador de reportes configurado (versión segura)");
+}
+
+// Función para limpiar sistema si es necesario
+function limpiarSistemaReportes() {
+    // Remover botones duplicados
+    const botonesDuplicados = document.querySelectorAll('.btn-reportar:not(:first-of-type)');
+    botonesDuplicados.forEach(boton => boton.remove());
+    
+    // Limpiar observador si existe
+    if (window.observadorReportes) {
+        window.observadorReportes.disconnect();
+        window.observadorReportes = null;
+    }
+    
+    console.log("🧹 Sistema de reportes limpiado");
+}
+
+// Inicialización segura
+function inicializarIntegracionReportes() {
+    // Verificar que Firebase esté listo
+    if (!auth || !auth.currentUser) {
+        setTimeout(inicializarIntegracionReportes, 500);
+        return;
+    }
+    
+    // Verificar que el sistema de reportes esté cargado
+    if (typeof agregarBotonReportar !== 'function') {
+        setTimeout(inicializarIntegracionReportes, 500);
+        return;
+    }
+    
+    console.log("🚀 Iniciando integración segura de reportes...");
+    
+    // Limpiar cualquier duplicado existente
+    limpiarSistemaReportes();
+    
+    // Configurar observador
+    setTimeout(() => {
+        configurarObservadorReportesSeguro();
+    }, 500);
+    
+    // Actualizar comentarios existentes
+    setTimeout(() => {
+        actualizarComentariosConReportesSeguro();
+    }, 1000);
+    
+    console.log("✅ Integración de reportes completada");
+}
+
+// Auto-inicialización cuando Firebase esté listo
+if (typeof auth !== 'undefined' && auth) {
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            setTimeout(inicializarIntegracionReportes, 1500);
+        }
+    });
+} else {
+    // Si auth no está disponible, esperar
+    document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(inicializarIntegracionReportes, 2000);
+    });
+}
+
+// Funciones de utilidad para debugging
+window.debugReportes = function() {
+    console.log("=== 🐛 DEBUG SISTEMA DE REPORTES ===");
+    console.log("Sistema integrado:", sistemaReportesIntegrado);
+    console.log("Usuario actual:", auth?.currentUser?.uid || "No autenticado");
+    console.log("Botones existentes:", document.querySelectorAll('.btn-reportar').length);
+    console.log("Comentarios con UID:", document.querySelectorAll('[data-uid]').length);
+    console.log("Función disponible:", typeof agregarBotonReportar);
+    console.log("Modal existe:", !!document.getElementById('modal-reportes'));
+};
+
+window.limpiarReportes = limpiarSistemaReportes;
+window.actualizarReportes = actualizarComentariosConReportesSeguro;
+
+// Función para recargar avatares fallidos (corregida)
+function recargarAvataresFallidosReportes() {
+    const avatares = document.querySelectorAll('.modal-avatar-reportes');
+    avatares.forEach(avatar => {
+        if (avatar.naturalWidth === 0 && avatar.complete) {
+            const src = avatar.src;
+            avatar.src = '';
+            setTimeout(() => {
+                avatar.src = verificarYCorregirAvatar(src);
+            }, 100);
+        }
+    });
+}
+
+// Ejecutar recarga de avatares cada 30 segundos
+setInterval(recargarAvataresFallidosReportes, 30000);
+
+console.log("✅ Integración de reportes cargada (versión corregida y sin duplicados)");

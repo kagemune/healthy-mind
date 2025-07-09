@@ -7,15 +7,15 @@
         }
 
         #config_body {
-            background-image: url('/Imagenes/imagenes/Ajustesclaro.jpg');
-  background-size: 400% 400%;
-  background-size: cover;
-  background-position: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  font-family: 'Poppins', sans-serif;
+        background-image: url('/Imagenes/imagenes/Ajustesclaro.jpg');
+        background-size: 400% 400%;
+        background-size: cover;
+        background-position: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        font-family: 'Poppins', sans-serif;
         }
 
         /* Cuando el modal está activo, prevenir scroll */
@@ -34,7 +34,31 @@
                 background-position: 0% 50%;
             }
         }
+        .back-arrow {
+        position: absolute;
+        left: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #ab4bff, #a24fe5);
+        color: white;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 25px;
+        text-decoration: none;
+        font-weight: 600;
+        box-shadow: 0 4px 8px rgba(171, 75, 255, 0.2);
+        transition: background 0.3s, box-shadow 0.3s;
+        font-size: 14px;
+        z-index: 10;
+        flex-shrink: 0;
+    }
 
+        .back-arrow:hover {
+        background: linear-gradient(135deg, #a24fe5, #ab4bff);
+        box-shadow: 0 6px 12px rgba(171, 75, 255, 0.3);
+        }
         /* Contenedor principal */
         .config_container {
             background: transparent;
@@ -69,19 +93,49 @@
         }
 
         /* Título principal */
-        .config_container h2 {
-            text-align: center;
-            background-image: linear-gradient(135deg, #9d34ff 50%, #844af8 100%);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-shadow: 0 2px 10px rgba(0, 128, 255, 0.3);
-            animation: pulse 2s infinite alternate;
-        }
+.config_container h2 {
+    text-align: center;
+    background-image: linear-gradient(135deg, #9d34ff 50%, #844af8 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-size: 2.5rem;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-shadow: 0 2px 10px rgba(0, 128, 255, 0.3);
+    animation: pulse 2s infinite alternate;
+    flex: 1;
+    margin-left: 60px;
+    margin-right: 60px;
+}
+/* Media queries para responsividad */
+@media (max-width: 768px) {
+    .config_container h2 {
+        font-size: 1.8rem;
+        margin-left: 50px;
+        margin-right: 10px;
+    }
+    
+    .back-arrow {
+        font-size: 12px;
+        padding: 6px 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .config_container h2 {
+        font-size: 1.3rem;
+        margin-left: 45px;
+        margin-right: 5px;
+    }
+    
+    .back-arrow {
+        font-size: 11px;
+        padding: 4px 8px;
+        gap: 4px;
+    }
+}
 
         @keyframes pulse {
             0% {
@@ -220,7 +274,7 @@
         }
 
         .modal-content {
-            background: rgba(255, 255, 255, 0.95);
+             background-image: linear-gradient(135deg, #fdcdfd 0%, #f7cafd 50%, #ffffff 100%);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             padding: 30px;
@@ -269,6 +323,7 @@
             background-image: linear-gradient(135deg, #8ec5fc 0%, #e0c3fc 100%);
             -webkit-background-clip: text;
             background-clip: text;
+            background-image: linear-gradient(135deg, #9d34ff 50%, #844af8 100%);
             color: transparent;
             text-align: center;
             margin-bottom: 25px;
@@ -576,8 +631,9 @@
 
 /* Estilos para el modal cuando está activo */
 .dark-mode .cambio_modal.active .modal-content {
-    background: rgba(40, 40, 40, 0.95); /* Fondo del contenido del modal */
-    color: white; /* Color de texto general dentro del modal */
+  background-image: linear-gradient(135deg, #232133 0%, #342381 50%, #ae4bff 100%);
+    border: 1px solid #333333;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 /* Estilos para los campos de entrada en el modal */
@@ -645,4 +701,68 @@
 
 .dark-mode .modal-text::-webkit-scrollbar-thumb {
     background: linear-gradient(135deg, #b8a0e9, #8ec5fc); /* Color del "pulgar" de la barra de desplazamiento */
+}
+
+/* Estilos específicos para el modal de cambiar contraseña */
+.dark-mode #change-password-modal.active .modal-content {
+    background-image: linear-gradient(135deg, #232133 0%, #342381 50%, #ae4bff 100%);
+    border: 1px solid #333333;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.dark-mode #change-password-modal .modal-text {
+    color: #ddd;
+}
+
+.dark-mode #change-password-modal .modal-text p {
+    color: #ddd;
+}
+
+.dark-mode #change-password-modal .modal-text strong {
+    color: #b8a0e9;
+}
+
+/* Estilos para el botón de redirección */
+.redirect-login-btn {
+    background: linear-gradient(135deg, #8ec5fc 0%, #b8a0e9 100%) !important;
+    transition: all 0.3s ease !important;
+}
+
+.redirect-login-btn:hover {
+    background: linear-gradient(135deg, #b8a0e9 0%, #8ec5fc 100%) !important;
+    transform: translateY(-2px) !important;
+}
+
+.dark-mode .redirect-login-btn {
+    background: linear-gradient(135deg, #8ec5fc 0%, #b8a0e9 100%) !important;
+}
+
+/* Estilos para el modal de confirmar contraseña */
+.dark-mode #confirm-password-modal.active .modal-content {
+    background-image: linear-gradient(135deg, #232133 0%, #342381 50%, #ae4bff 100%);
+    border: 1px solid #333333;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.dark-mode #confirm-password-modal .modal-text {
+    color: #ddd;
+}
+
+.dark-mode #confirm-password-modal .modal-text p {
+    color: #ddd;
+}
+
+.dark-mode #confirm-password-modal .modal-text strong {
+    color: #b8a0e9;
+}
+
+.dark-mode #confirm-password-modal input {
+    background: rgba(80, 80, 80, 0.8);
+    color: white;
+    border-color: #555;
+}
+
+.dark-mode #confirm-password-modal input:focus {
+    border-color: #8ec5fc;
+    box-shadow: 0 0 0 3px rgba(142, 197, 252, 0.3);
 }

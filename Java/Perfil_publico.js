@@ -628,3 +628,34 @@ window.PerfilPublicoAPI = {
 };
 
 console.log("✅ Sistema de perfil público inicializado");
+
+// Modo Oscuro
+document.addEventListener("DOMContentLoaded", function () {
+    const body = document.body;
+    const themeStatus = document.getElementById("theme-status");
+    const toggleThemeBtn = document.getElementById("toggle-theme");
+
+    function toggleDarkMode() {
+        body.classList.toggle("dark-mode");
+        const isDarkMode = body.classList.contains("dark-mode");
+        localStorage.setItem("theme", isDarkMode ? "dark" : "light");
+        if (themeStatus) {
+            themeStatus.textContent = isDarkMode ? "Oscuro" : "Claro";
+        }
+    }
+
+    if (localStorage.getItem("theme") === "dark") {
+        body.classList.add("dark-mode");
+        if (themeStatus) {
+            themeStatus.textContent = "Oscuro";
+        }
+    } else {
+        if (themeStatus) {
+            themeStatus.textContent = "Claro";
+        }
+    }
+
+    if (toggleThemeBtn) {
+        toggleThemeBtn.addEventListener("click", toggleDarkMode);
+    }
+});

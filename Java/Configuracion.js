@@ -62,6 +62,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const aboutBtn = document.getElementById('about-btn');
     const deactivateBtn = document.getElementById('deactivate-btn');
     const deleteBtn = document.getElementById('delete-btn');
+    const changePasswordBtn = document.querySelector('.config_item:nth-child(3)'); 
+    const confirmDeactivateBtn = document.querySelector('.confirm-deactivate-btn');
+    const confirmDeleteBtn = document.querySelector('.confirm-delete-btn');
+    const quienesSomosBtn = document.getElementById('quienes-somos-btn');
+
 
     if (securityBtn) {
         securityBtn.addEventListener('click', () => openModal('security-modal'));
@@ -79,12 +84,21 @@ document.addEventListener("DOMContentLoaded", function () {
         aboutBtn.addEventListener('click', () => openModal('about-modal'));
     }
 
-    if (deactivateBtn) {
-        deactivateBtn.addEventListener('click', () => openModal('deactivate-modal'));
+   if (deactivateBtn) {
+    deactivateBtn.addEventListener('click', () => openModal('deactivate-modal'));
+}
+    if (deleteBtn) {
+    deleteBtn.addEventListener('click', () => openModal('delete-modal'));
+}
+  
+    if (changePasswordBtn) {
+        changePasswordBtn.addEventListener('click', () => openModal('change-password-modal'));
     }
 
-    if (deleteBtn) {
-        deleteBtn.addEventListener('click', () => openModal('delete-modal'));
+    if (quienesSomosBtn) {
+         quienesSomosBtn.addEventListener('click', () => {
+            window.location.href = "/contenido_de_la_pagina/Quienes_somos/quienes_somos.html";
+            });
     }
 
     // Cerrar modales con X
@@ -108,6 +122,29 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+// Event listener para confirmar contraseña
+const confirmPasswordBtn = document.querySelector('.confirm-password-btn');
+if (confirmPasswordBtn) {
+    confirmPasswordBtn.addEventListener('click', () => {
+        const password = document.getElementById('current-password').value;
+        if (password.trim() === '') {
+            alert('Por favor, ingresa tu contraseña actual.');
+            return;
+        }
+        
+        // Guardar la contraseña y la acción pendiente
+        window.pendingPassword = password;
+        closeModal('confirm-password-modal');
+        
+        // Ejecutar la acción pendiente
+        if (window.pendingAction === 'deactivate') {
+            executeDeactivateAccount();
+        } else if (window.pendingAction === 'delete') {
+            executeDeleteAccount();
+        }
+    });
+}
+
     // Cerrar modal al hacer clic fuera del contenido
     const modals = document.querySelectorAll('.cambio_modal');
     modals.forEach(modal => {
@@ -118,6 +155,18 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     });
+    // Función para reautenticar usuario
+
+async function reauthenticateUser(password) {
+    const user = firebase.auth().currentUser;
+    if (!user) throw new Error('No hay usuario autenticado');
+    
+    // Crear credential sin disparar prompt
+    const credential = firebase.auth.EmailAuthProvider.credential(user.email, password);
+    
+    // Re-autenticar de forma silenciosa
+    return user.reauthenticateWithCredential(credential);
+}
 
     // 🔹 Función para verificar autenticación con timeout
     function waitForAuth(timeout = 3000) {
@@ -140,209 +189,184 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // 🔥 FUNCIONALIDAD DESACTIVAR CUENTA
-    const confirmDeactivateBtn = document.querySelector('.confirm-deactivate-btn');
-    if (confirmDeactivateBtn) {
-        confirmDeactivateBtn.addEventListener('click', async () => {
-            try {
-                // Mostrar indicador de carga
-                confirmDeactivateBtn.textContent = 'Verificando...';
-                confirmDeactivateBtn.disabled = true;
+// Reemplazar toda la función del botón de desactivar cuenta
+async function executeDeactivateAccount() {
+    try {
+        confirmDeactivateBtn.textContent = 'Verificando contraseña...';
+        confirmDeactivateBtn.disabled = true;
 
-                // Esperar a que Firebase verifique la autenticación
-                const user = await waitForAuth();
-                
-                // Mostrar que está procesando
-                confirmDeactivateBtn.textContent = 'Desactivando...';
+        const user = await waitForAuth();
+        
+        // Reautenticar INMEDIATAMENTE después de obtener el usuario
+        await reauthenticateUser(window.pendingPassword);
+        
+        confirmDeactivateBtn.textContent = 'Desactivando...';
 
-                // Actualizar el estado del usuario en Firestore
-                await firebase.firestore().collection('usuarios').doc(user.uid).update({
-                    activo: false,
-                    fechaDesactivacion: firebase.firestore.FieldValue.serverTimestamp(),
-                    'estadisticas.ultimaActividad': firebase.firestore.FieldValue.serverTimestamp()
-                });
-
-                console.log('Cuenta desactivada correctamente');
-                
-                // Mostrar mensaje de éxito
-                alert('Tu cuenta ha sido desactivada correctamente. Podrás reactivarla iniciando sesión nuevamente.');
-                
-                // Cerrar sesión y redirigir
-                await firebase.auth().signOut();
-                
-                // Limpiar datos locales
-                localStorage.removeItem('userSession');
-                localStorage.removeItem('theme');
-                sessionStorage.clear();
-                
-                // Redirigir a inicio de sesión
-                window.location.href = "/contenido_de_la_pagina/Inicio_de_sesion/Inicio_de_sesion.html";
-
-            } catch (error) {
-                console.error('Error al desactivar cuenta:', error);
-                
-                let errorMessage = 'Error al desactivar la cuenta';
-                if (error.message.includes('Timeout')) {
-                    errorMessage = 'Por favor, espera un momento y vuelve a intentarlo. La aplicación se está cargando.';
-                } else if (error.message.includes('no autenticado')) {
-                    errorMessage = 'Sesión expirada. Por favor, inicia sesión nuevamente.';
-                } else {
-                    errorMessage += ': ' + error.message;
-                }
-                
-                alert(errorMessage);
-                
-                // Restaurar botón
-                confirmDeactivateBtn.textContent = 'Desactivar';
-                confirmDeactivateBtn.disabled = false;
-            }
+        await firebase.firestore().collection('usuarios').doc(user.uid).update({
+            activo: false,
+            fechaDesactivacion: firebase.firestore.FieldValue.serverTimestamp(),
+            'estadisticas.ultimaActividad': firebase.firestore.FieldValue.serverTimestamp()
         });
+
+        console.log('Cuenta desactivada correctamente');
+        alert('Tu cuenta ha sido desactivada correctamente. Podrás reactivarla iniciando sesión nuevamente.');
+        
+        await firebase.auth().signOut();
+        
+        // Limpiar storage solo si está disponible
+        if (typeof Storage !== 'undefined') {
+            localStorage.removeItem('userSession');
+            localStorage.removeItem('theme');
+            sessionStorage.clear();
+        }
+        
+        window.location.href = "/contenido_de_la_pagina/Inicio_de_sesion/Inicio_de_sesion.html";
+
+    } catch (error) {
+        console.error('Error al desactivar cuenta:', error);
+        
+        let errorMessage = 'Error al desactivar la cuenta';
+        if (error.code === 'auth/wrong-password') {
+            errorMessage = 'Contraseña incorrecta. Por favor, verifica tu contraseña.';
+        } else if (error.code === 'auth/too-many-requests') {
+            errorMessage = 'Demasiados intentos fallidos. Intenta nuevamente más tarde.';
+        } else if (error.message.includes('no autenticado')) {
+            errorMessage = 'Sesión expirada. Por favor, inicia sesión nuevamente.';
+        }
+        
+        alert(errorMessage);
+        confirmDeactivateBtn.textContent = 'Desactivar';
+        confirmDeactivateBtn.disabled = false;
     }
+    
+    // Limpiar contraseña temporal
+    delete window.pendingPassword;
+    delete window.pendingAction;
+}
 
     // 🔥 FUNCIONALIDAD ELIMINAR CUENTA
-    const confirmDeleteBtn = document.querySelector('.confirm-delete-btn');
-    if (confirmDeleteBtn) {
-        confirmDeleteBtn.addEventListener('click', async () => {
-            // Doble confirmación para eliminar cuenta
-            const confirmacion = confirm('⚠️ ÚLTIMA CONFIRMACIÓN: Esta acción eliminará PERMANENTEMENTE todos tus datos. ¿Estás completamente seguro?');
+   // Reemplazar toda la función del botón de eliminar cuenta
+if (confirmDeleteBtn) {
+    confirmDeleteBtn.addEventListener('click', () => {
+
+
+
+        window.pendingAction = 'delete';
+        document.getElementById('current-password').value = '';
+        closeModal('delete-modal');
+        openModal('confirm-password-modal');
+    });
+}
+
+if (confirmDeactivateBtn) {
+    confirmDeactivateBtn.addEventListener('click', () => {
+        window.pendingAction = 'deactivate';
+        document.getElementById('current-password').value = '';
+        closeModal('deactivate-modal');
+        openModal('confirm-password-modal');
+    });
+}
+
+// Función para ejecutar la eliminación de cuenta
+async function executeDeleteAccount() {
+    try {
+        confirmDeleteBtn.textContent = 'Verificando contraseña...';
+        confirmDeleteBtn.disabled = true;
+
+        const user = await waitForAuth();
+        
+        // Reautenticar INMEDIATAMENTE después de obtener el usuario
+        await reauthenticateUser(window.pendingPassword);
+        
+        confirmDeleteBtn.textContent = 'Eliminando...';
+
+        const batch = firebase.firestore().batch();
+        const userId = user.uid;
+
+        // Eliminar datos de Firestore
+        const userRef = firebase.firestore().collection('usuarios').doc(userId);
+        batch.delete(userRef);
+
+        const configRef = firebase.firestore().collection('configuraciones').doc(userId);
+        batch.delete(configRef);
+
+        const comentariosSnapshot = await firebase.firestore()
+            .collection('comentarios')
+            .where('uid', '==', userId)
+            .get();
+
+        comentariosSnapshot.forEach((doc) => {
+            batch.delete(doc.ref);
+        });
+
+        const respuestasSnapshot = await firebase.firestore()
+            .collection('respuestas')
+            .where('uid', '==', userId)
+            .get();
+
+        respuestasSnapshot.forEach((doc) => {
+            batch.delete(doc.ref);
+        });
+
+        const mensajesSnapshot = await firebase.firestore()
+            .collection('mensajes')
+            .where('autorId', '==', userId)
+            .get();
+
+        mensajesSnapshot.forEach((doc) => {
+            batch.delete(doc.ref);
+        });
+
+        const chatsSnapshot = await firebase.firestore()
+            .collection('chats')
+            .where('participantes', 'array-contains', userId)
+            .get();
+
+        chatsSnapshot.forEach((doc) => {
+            const chatData = doc.data();
+            const participantes = chatData.participantes.filter(p => p !== userId);
             
-            if (!confirmacion) {
-                return;
-            }
-
-            try {
-                // Mostrar indicador de carga
-                confirmDeleteBtn.textContent = 'Verificando...';
-                confirmDeleteBtn.disabled = true;
-
-                // Esperar a que Firebase verifique la autenticación
-                const user = await waitForAuth();
-                
-                // Mostrar que está procesando
-                confirmDeleteBtn.textContent = 'Eliminando...';
-
-                const batch = firebase.firestore().batch();
-                const userId = user.uid;
-
-                // 1. Eliminar documento del usuario
-                const userRef = firebase.firestore().collection('usuarios').doc(userId);
-                batch.delete(userRef);
-
-                // 2. Eliminar configuraciones del usuario
-                const configRef = firebase.firestore().collection('configuraciones').doc(userId);
-                batch.delete(configRef);
-
-                // 3. Buscar y eliminar comentarios del usuario
-                const comentariosSnapshot = await firebase.firestore()
-                    .collection('comentarios')
-                    .where('uid', '==', userId)
-                    .get();
-
-                comentariosSnapshot.forEach((doc) => {
-                    batch.delete(doc.ref);
-                });
-
-                // 4. Buscar y eliminar respuestas del usuario
-                const respuestasSnapshot = await firebase.firestore()
-                    .collection('respuestas')
-                    .where('uid', '==', userId)
-                    .get();
-
-                respuestasSnapshot.forEach((doc) => {
-                    batch.delete(doc.ref);
-                });
-
-                // 5. Buscar y eliminar mensajes del usuario
-                const mensajesSnapshot = await firebase.firestore()
-                    .collection('mensajes')
-                    .where('autorId', '==', userId)
-                    .get();
-
-                mensajesSnapshot.forEach((doc) => {
-                    batch.delete(doc.ref);
-                });
-
-                // 6. Buscar chats donde el usuario participa y eliminarlo de la lista
-                const chatsSnapshot = await firebase.firestore()
-                    .collection('chats')
-                    .where('participantes', 'array-contains', userId)
-                    .get();
-
-                chatsSnapshot.forEach((doc) => {
-                    const chatData = doc.data();
-                    const participantes = chatData.participantes.filter(p => p !== userId);
-                    
-                    if (participantes.length === 0) {
-                        // Si no quedan participantes, eliminar el chat
-                        batch.delete(doc.ref);
-                    } else {
-                        // Si quedan participantes, solo remover al usuario
-                        batch.update(doc.ref, { participantes: participantes });
-                    }
-                });
-
-                // Ejecutar todas las eliminaciones
-                await batch.commit();
-
-                console.log('Datos de Firestore eliminados correctamente');
-
-                // 7. Eliminar cuenta de Authentication
-                await user.delete();
-
-                console.log('Cuenta eliminada completamente');
-                
-                // Limpiar datos locales
-                localStorage.clear();
-                sessionStorage.clear();
-                
-                // Mostrar mensaje de confirmación
-                alert('Tu cuenta y todos tus datos han sido eliminados permanentemente.');
-                
-                // Redirigir a inicio de sesión
-                window.location.href = "/contenido_de_la_pagina/Inicio_de_sesion/Inicio_de_sesion.html";
-
-            } catch (error) {
-                console.error('Error al eliminar cuenta:', error);
-                
-                let errorMessage = 'Error al eliminar la cuenta';
-                
-                if (error.message.includes('Timeout')) {
-                    errorMessage = 'Por favor, espera un momento y vuelve a intentarlo. La aplicación se está cargando.';
-                } else if (error.message.includes('no autenticado')) {
-                    errorMessage = 'Sesión expirada. Por favor, inicia sesión nuevamente.';
-                } else if (error.code === 'auth/requires-recent-login') {
-                    errorMessage = 'Por seguridad, necesitas haber iniciado sesión recientemente. Cierra sesión e inicia sesión nuevamente, luego intenta eliminar tu cuenta.';
-                } else if (error.message) {
-                    errorMessage += ': ' + error.message;
-                }
-                
-                alert(errorMessage);
-                
-                // Restaurar botón
-                confirmDeleteBtn.textContent = 'Eliminar definitivamente';
-                confirmDeleteBtn.disabled = false;
+            if (participantes.length === 0) {
+                batch.delete(doc.ref);
+            } else {
+                batch.update(doc.ref, { participantes: participantes });
             }
         });
+
+        await batch.commit();
+        console.log('Datos de Firestore eliminados correctamente');
+
+        await user.delete();
+        console.log('Cuenta eliminada completamente');
+        
+        // Limpiar storage solo si está disponible
+        if (typeof Storage !== 'undefined') {
+            localStorage.clear();
+            sessionStorage.clear();
+        }
+        
+        alert('Tu cuenta y todos tus datos han sido eliminados permanentemente.');
+        window.location.href = "/contenido_de_la_pagina/Inicio_de_sesion/Inicio_de_sesion.html";
+
+    } catch (error) {
+        console.error('Error al eliminar cuenta:', error);
+        
+        let errorMessage = 'Error al eliminar la cuenta';
+        if (error.code === 'auth/wrong-password') {
+            errorMessage = 'Contraseña incorrecta. Por favor, verifica tu contraseña.';
+        } else if (error.code === 'auth/too-many-requests') {
+            errorMessage = 'Demasiados intentos fallidos. Intenta nuevamente más tarde.';
+        } else if (error.message.includes('no autenticado')) {
+            errorMessage = 'Sesión expirada. Por favor, inicia sesión nuevamente.';
+        }
+        
+        alert(errorMessage);
+        confirmDeleteBtn.textContent = 'Eliminar definitivamente';
+        confirmDeleteBtn.disabled = false;
     }
-
-    // 🔹 Función auxiliar para reautenticar usuario (si es necesario)
-    async function reauthenticateUser() {
-        return new Promise((resolve, reject) => {
-            const user = firebase.auth().currentUser;
-            const password = prompt('Por favor, confirma tu contraseña actual para continuar:');
-            
-            if (!password) {
-                reject(new Error('Contraseña requerida'));
-                return;
-            }
-
-            const credential = firebase.auth.EmailAuthProvider.credential(
-                user.email,
-                password
-            );
-
-            user.reauthenticateWithCredential(credential)
-                .then(() => resolve())
-                .catch((error) => reject(error));
-        });
-    }
+    
+    // Limpiar contraseña temporal
+    delete window.pendingPassword;
+    delete window.pendingAction;
+}
 });

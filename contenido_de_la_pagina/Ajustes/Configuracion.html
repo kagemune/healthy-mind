@@ -8,8 +8,13 @@
 
 </head>
 <body id="config_body">
-    <div id="config_container" class="config_container">
-        <h2>Configuración</h2>
+   <div id="config_container" class="config_container">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; position: relative; width: 100%;">
+            <a href="/index.html" class="back-arrow" title="Volver">
+                <i class="fas fa-arrow-left"></i> ⬅️  
+            </a>
+            <h2>Configuración</h2>
+        </div>
 
         <div class="config">
             <div class="config_item" id="toggle-theme">
@@ -21,8 +26,8 @@
                 <p>Seguridad</p>
             </div>
             <div class="config_item">
-                <span>🔔</span>
-                <p>Notificaciones</p>
+                <span>🔑</span>
+                <p>Cambiar contraseña</p>
             </div>
             <div class="config_item" id="privacy-btn">
                 <span>📜</span>
@@ -36,9 +41,9 @@
                 <span>ℹ️</span>
                 <p>Acerca de</p>
             </div>
-            <div class="config_item danger">
-                <span>🚫</span>
-                <p>Usuarios bloqueados</p>
+            <div class="config_item" id="quienes-somos-btn">
+                <span>❓</span>
+                <p>¿Quiénes somos?</p>
             </div>
             <div class="config_item danger" id="deactivate-btn">
                 <span>⏸️</span>
@@ -172,11 +177,11 @@
             <h2 style="color: #ff4d6d;">⚠️ Eliminar cuenta</h2>
             <div class="modal-text">
                 <p><strong>¿Estás seguro de que quieres eliminar permanentemente tu cuenta?</strong></p>
-                <div style="background: #ffe6e6; padding: 15px; border-left: 4px solid #ff4d6d; margin: 15px 0; border-radius: 4px;">
+                <div style="padding: 15px; border-left: 4px solid #ff4d6d; margin: 15px 0; border-radius: 4px;">
                     <p style="color: #ff4d6d; margin: 0;"><strong>⚠️ ADVERTENCIA: Esta acción NO se puede deshacer</strong></p>
                 </div>
                 <p><strong>Al eliminar tu cuenta se borrarán PERMANENTEMENTE:</strong></p>
-                <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin: 10px 0;">
+                <div style="padding: 10px; border-radius: 5px; margin: 10px 0;">
                     <p style="margin: 5px 0;">🗑️ Todos tus datos personales</p>
                     <p style="margin: 5px 0;">💬 Todos tus mensajes y chats</p>
                     <p style="margin: 5px 0;">📝 Todos tus comentarios y respuestas</p>
@@ -191,6 +196,40 @@
             </div>
         </div>
     </div>
+
+    <!-- MODAL CAMBIAR CONTRASEÑA -->
+<div id="change-password-modal" class="cambio_modal">
+    <div class="modal-content">
+        <span class="close-btn" data-modal="change-password-modal">✖</span>
+        <h2>Cambiar Contraseña</h2>
+        <div class="modal-text">
+            <p><strong>¿Necesitas cambiar tu contraseña?</strong></p>
+            <p>Para cambiar tu contraseña de forma segura, sigue estos pasos:</p>
+            <div style="padding: 15px; border-radius: 8px; margin: 15px 0;">
+                <p style="margin: 8px 0;">1️⃣ Ve a la página de inicio de sesión</p>
+                <p style="margin: 8px 0;">2️⃣ Haz clic en "¿Olvidaste tu contraseña?"</p>
+                <p style="margin: 8px 0;">3️⃣ Ingresa tu email registrado</p>
+                <p style="margin: 8px 0;">4️⃣ Revisa tu correo y sigue las instrucciones</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CONFIRMAR CONTRASEÑA -->
+<div id="confirm-password-modal" class="cambio_modal">
+    <div class="modal-content">
+        <span class="close-btn" data-modal="confirm-password-modal">✖</span>
+        <h2>Confirmar Contraseña</h2>
+        <div class="modal-text">
+            <p><strong>Por seguridad, confirma tu contraseña actual:</strong></p>
+            <input type="password" id="current-password" placeholder="Contraseña actual" style="width: 100%; padding: 15px; margin: 15px 0; border: 2px solid #e0e0e0; border-radius: 12px; font-size: 16px; box-sizing: border-box;">
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button class="cancel-btn" style="flex: 1; padding: 12px; border: 1px solid #ccc; background: white; cursor: pointer; border-radius: 5px;">Cancelar</button>
+                <button class="confirm-password-btn" style="flex: 1; padding: 12px; background: #8ec5fc; color: white; border: none; cursor: pointer; border-radius: 5px;">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
 
     <script defer src="/Java/Configuracion.js"></script>
         <!-- Firebase SDK -->

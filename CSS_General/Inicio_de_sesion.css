@@ -33,10 +33,11 @@ body {
 }
 
 .wrapper img {
-    width: 100px;
-    height: 70px;
+    width: 260px;
+    height: 46px;
     display: block;
     margin: 0 auto;
+    margin-bottom: 20px;
 }
 
 .wrapper .input-box {
@@ -229,18 +230,20 @@ body {
 }
 
 .modal-content{
-    width: 80%;
-    max-width: 800px;
-    max-height: 80vh;
-    background-image: linear-gradient(135deg, #eca4e6 0%, #8bb0ff 50%, #b574e0 100%);
-    border-radius: 15px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     padding: 30px;
+    border-radius: 20px;
+    width: 90%;
+    max-width: 500px;
     position: relative;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
-    color: #fff;
-    transform: translateY(-50px);
-    transition: transform 0.4s ease-out;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    transform: scale(0.8);
+    animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    max-height: 80vh;
     overflow-y: auto;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .modal.active  {
@@ -273,6 +276,17 @@ body {
     color: #fff;
     font-weight: 700;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header h1 {
+    background-image: linear-gradient(135deg, #8ec5fc 0%, #e0c3fc 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 2rem;
+    font-weight: 600;
 }
 
 .modal-footer {
@@ -312,25 +326,30 @@ body {
 }
 
 .terms-content h3 {
-    margin-top: 24px;
-    margin-bottom: 12px;
-    color: #fff;
-    font-weight: 600;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    color: #8ec5fc;
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.terms-content h4{
+    color: #8ec5fc;
+    font-size: 1rem;
+    margin: 15px 0 8px 0;
 }
 
 .terms-content p {
-    margin-bottom: 16px;
+    margin-bottom: 12px;
+    color: #333;
 }
 
 .terms-content ul {
     margin-left: 20px;
-    margin-bottom: 16px;
+    color: #333;
 }
 
 .terms-content ul li {
     margin-bottom: 8px;
-    position: relative;
 }
 
 .terms-content ul li:before {
@@ -366,10 +385,10 @@ body {
 /* ====== ESTILOS PARA MODAL DE RECUPERACIÓN DE CONTRASEÑA ====== */
 /* Agregar al final de Inicio_de_sesion.css */
 
-/* Modal de recuperación */
-.modal-recuperacion {
+/* Modal de recuperación y validacion de correo */
+.modal-recuperacion, .modal-verificacion {
     display: none;
-    position: fixed;
+    position: fixed; 
     z-index: 2000;
     left: 0;
     top: 0;
@@ -381,7 +400,7 @@ body {
     justify-content: center;
 }
 
-.modal-recuperacion-contenido {
+.modal-recuperacion-contenido, .modal-verificacion-contenido {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 20px;
     padding: 0;
@@ -403,7 +422,7 @@ body {
     }
 }
 
-.modal-recuperacion-header {
+.modal-recuperacion-header, .modal-verificacion-header {
     background: rgba(255, 255, 255, 0.1);
     padding: 20px;
     display: flex;
@@ -412,14 +431,14 @@ body {
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.modal-recuperacion-header h3 {
+.modal-recuperacion-header, .modal-verificacion-header h3 {
     color: white;
     margin: 0;
     font-size: 1.3rem;
     font-weight: 600;
 }
 
-.cerrar-modal {
+.cerrar-modal, .cerrar-modal-verificacion {
     color: white;
     font-size: 28px;
     font-weight: bold;
@@ -433,24 +452,24 @@ body {
     transition: all 0.3s ease;
 }
 
-.cerrar-modal:hover {
+.cerrar-modal:hover, .cerrar-modal-verificacion:hover {
     background: rgba(255, 255, 255, 0.2);
     transform: rotate(90deg);
 }
 
-.modal-recuperacion-body {
+.modal-recuperacion-body, .modal-verificacion-body {
     padding: 25px;
     background: white;
 }
 
-.descripcion-recuperacion {
+.descripcion-recuperacion, .advertencia-verificacion {
     color: #666;
     margin-bottom: 20px;
     line-height: 1.5;
     text-align: center;
 }
 
-.formulario-recuperacion {
+.formulario-recuperacion, .botones-verificacion {
     margin-bottom: 20px;
 }
 
@@ -500,15 +519,15 @@ body {
     color: #667eea;
 }
 
-.botones-recuperacion {
+.botones-recuperacion, .botones-verificacion {
     display: flex;
     gap: 15px;
     justify-content: flex-end;
     margin-top: 25px;
 }
 
-.btn-cancelar,
-.btn-recuperar {
+.btn-cancelar, .btn-recuperar,
+.btn-cancelar-verificacion, .btn-reenviar-verificacion {
     padding: 12px 24px;
     border: none;
     border-radius: 25px;
@@ -519,18 +538,18 @@ body {
     min-width: 100px;
 }
 
-.btn-cancelar {
+.btn-cancelar, .btn-cancelar-verificacion {
     background: #f8f9fa;
     color: #6c757d;
     border: 2px solid #dee2e6;
 }
 
-.btn-cancelar:hover {
+.btn-cancelar:hover, .btn-cancelar-verificacion:hover {
     background: #e9ecef;
     border-color: #adb5bd;
 }
 
-.btn-recuperar {
+.btn-recuperar, .btn-reenviar-verificacion {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     display: flex;
@@ -539,7 +558,7 @@ body {
     gap: 8px;
 }
 
-.btn-recuperar:hover:not(:disabled) {
+.btn-recuperar:hover:not(:disabled), .btn-reenviar-verificacion:hover {
     background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
     transform: translateY(-2px);
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
@@ -560,14 +579,16 @@ body {
     100% { transform: rotate(360deg); }
 }
 
-.info-adicional {
+.info-adicional, .info-adicional-verificacion {
     background: #f8f9fa;
     padding: 15px;
     border-radius: 10px;
     border-left: 4px solid #667eea;
 }
 
-.info-adicional small {
+
+
+.info-adicional, .info-adicional-verificacion small {
     color: #6c757d;
     line-height: 1.4;
 }
@@ -654,22 +675,22 @@ body {
 
 /* Responsive */
 @media (max-width: 768px) {
-    .modal-recuperacion-contenido {
+    .modal-recuperacion-contenido, .modal-verificacion-contenido {
         width: 95%;
         margin: 20px;
     }
     
-    .modal-recuperacion-body {
+    .modal-recuperacion-body, .modal-verificacion-body {
         padding: 20px;
     }
     
-    .botones-recuperacion {
+    .botones-recuperacion, .botones-verificacion {
         flex-direction: column;
         gap: 10px;
     }
     
-    .btn-cancelar,
-    .btn-recuperar {
+    .btn-cancelar, .btn-recuperar, 
+    .btn-cancelar-verificacion, .btn-reenviar-verificacion {
         width: 100%;
     }
 }
@@ -771,15 +792,14 @@ body.dark-mode {
     color: #e0e0e0;
 }
 
-/* Dark Mode Modal Styling */
+/* modo oscuro terminos y condiciones*/
 .dark-mode .modal {
     background: rgba(0, 0, 0, 0.8);
 }
 
 .dark-mode .modal-content {
-    background-image: linear-gradient(135deg, #232133 0%, #342381 50%, #ae4bff 100%);
-    border: 1px solid #333333;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    background: rgba(40, 40, 40, 0.95); /* Fondo del contenido del modal */
+    color: white;
 }
 
 .dark-mode .modal-close {
@@ -822,6 +842,14 @@ body.dark-mode {
 
 .dark-mode .terms-content ul li:before {
     color: #8ec5fc;
+}
+
+.dark-mode .terms-content ul {
+    color: #ddd;
+}
+
+.dark-mode .terms-content p {
+    color: #ddd;
 }
 
 /* Custom scrollbar for dark mode */

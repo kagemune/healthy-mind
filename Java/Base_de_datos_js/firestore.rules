@@ -1,0 +1,157 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ========================================
+    //  USUARIOS - MODIFICADO para perfiles públicos
+    // ========================================
+    match /usuarios/{userId} {
+      //  NUEVO: Permitir lectura pública de perfiles para el sistema de perfiles públicos
+      allow read: if true;
+      
+      // Solo el dueño puede escribir/modificar su perfil
+      allow write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // ========================================
+    // SEGUIDORES - NUEVA COLECCIÓN para el sistema de seguimiento
+    // ========================================
+    match /seguidores/{followId} {
+      // Cualquier usuario autenticado puede leer información de seguimiento
+      allow read: if request.auth != null;
+      
+      // Solo usuarios autenticados pueden crear/eliminar seguimientos
+      // Y solo pueden modificar sus propios seguimientos
+      allow create, delete: if request.auth != null && 
+                            request.auth.uid == request.resource.data.seguidor;
+      
+      // No permitir updates, solo create/delete
+      allow update: if false;
+    }
+    
+    // ========================================
+    // Configuraciones - Solo el dueño accede (SIN CAMBIOS)
+    // ========================================
+    match /configuraciones/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    
+    // ========================================
+    //  COMENTARIOS - MODIFICADO para lectura pública
+    // ========================================
+    match /comentarios/{comentarioId} {
+      //  NUEVO: Permitir lectura pública de comentarios activos para perfiles públicos
+      allow read: if resource.data.activo == true;
+      
+      // Solo usuarios autenticados pueden crear comentarios
+      allow create: if request.auth != null && 
+                   request.auth.uid == request.resource.data.uid &&
+                   request.resource.data.activo == true;
+      
+      // MODIFICADO: Permitir actualizaciones para reacciones Y para el autor
+      allow update: if request.auth != null && (
+        // El autor puede actualizar todo su comentario
+        request.auth.uid == resource.data.uid ||
+        // O cualquier usuario autenticado puede actualizar solo las reacciones
+        (onlyReactionsChanged() && request.resource.data.uid == resource.data.uid)
+      );
+      
+      // Solo el autor puede "eliminar" (marcar como inactivo)
+      allow delete: if request.auth != null && 
+                   request.auth.uid == resource.data.uid;
+    }
+    
+    // ========================================
+    //  RESPUESTAS - MODIFICADO para lectura pública
+    // ========================================
+    match /respuestas/{respuestaId} {
+      //  NUEVO: Permitir lectura pública de respuestas activas para perfiles públicos
+      allow read: if resource.data.activo == true;
+      
+      // Solo usuarios autenticados pueden crear respuestas
+      allow create: if request.auth != null && 
+                   request.auth.uid == request.resource.data.uid &&
+                   request.resource.data.activo == true;
+      
+      // MODIFICADO: Permitir actualizaciones para reacciones Y para el autor
+      allow update: if request.auth != null && (
+        // El autor puede actualizar toda su respuesta
+        request.auth.uid == resource.data.uid ||
+        // O cualquier usuario autenticado puede actualizar solo las reacciones
+        (onlyReactionsChanged() && request.resource.data.uid == resource.data.uid)
+      );
+      
+      // Solo el autor puede "eliminar" (marcar como inactivo)
+      allow delete: if request.auth != null && 
+                   request.auth.uid == resource.data.uid;
+    }
+    
+    // ========================================
+    //  MENSAJES - NUEVA COLECCIÓN para el sistema de mensajes futuro
+    // ========================================
+    match /mensajes/{mensajeId} {
+      // Solo los participantes pueden leer mensajes
+      allow read: if request.auth != null && 
+                  (request.auth.uid == resource.data.emisor || 
+                   request.auth.uid == resource.data.receptor);
+      
+      // Solo el emisor puede crear mensajes
+      allow create: if request.auth != null && 
+                    request.auth.uid == request.resource.data.emisor;
+      
+      // Los mensajes no se pueden modificar una vez enviados
+      allow update, delete: if false;
+    }
+    
+    // ========================================
+    // Chats - Solo participantes acceden (SIN CAMBIOS)
+    // ========================================
+    match /chats/{chatId} {
+      allow read, write: if request.auth != null &&
+                         request.auth.uid in resource.data.participantes;
+    }
+    
+    // ========================================
+    //  NOTIFICACIONES - NUEVA COLECCIÓN para el sistema de notificaciones
+    // ========================================
+    match /notificaciones/{notificationId} {
+      // Solo el destinatario puede leer sus notificaciones
+      allow read: if request.auth != null && 
+                  request.auth.uid == resource.data.destinatario;
+      
+      // El sistema puede crear notificaciones para cualquier usuario
+      allow create: if request.auth != null;
+      
+      // Solo el destinatario puede marcar como leídas
+      allow update: if request.auth != null && 
+                    request.auth.uid == resource.data.destinatario;
+      
+      // Solo el destinatario puede eliminar sus notificaciones
+      allow delete: if request.auth != null && 
+                    request.auth.uid == resource.data.destinatario;
+    }
+    
+    // ========================================
+    // Por defecto, denegar el resto (SIN CAMBIOS)
+    // ========================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+
+// ========================================
+// FUNCIÓN AUXILIAR: Verificar que solo cambiaron las reacciones (SIN CAMBIOS)
+// ========================================
+function onlyReactionsChanged() {
+  // Verificar que todos los campos excepto 'reacciones' permanecen iguales
+  return request.resource.data.keys().hasAll(resource.data.keys()) &&
+         resource.data.keys().hasAll(request.resource.data.keys()) &&
+         request.resource.data.uid == resource.data.uid &&
+         request.resource.data.usuario == resource.data.usuario &&
+         request.resource.data.texto == resource.data.texto &&
+         request.resource.data.comentarioId == resource.data.get('comentarioId', null) &&
+         request.resource.data.timestamp == resource.data.timestamp &&
+         request.resource.data.fechaCreacion == resource.data.fechaCreacion &&
+         request.resource.data.hora == resource.data.hora &&
+         request.resource.data.activo == resource.data.activo;
+}
