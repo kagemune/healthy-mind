@@ -9,26 +9,26 @@ exports.app = app;
 app.use(express.json());
 app.use(cors());
 
-// APII.js (Backend - Firebase Admin SDK)
-const admin = require('firebase-admin');
+// // APII.js (Backend - Firebase Admin SDK)
+// const admin = require('firebase-admin');
 
-// Configuración desde variables de entorno (mejor práctica)
-const serviceAccount = {
-  projectId: process.env.FIREBASE_PROJECT_ID,
-  clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-  privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
-};
+// // Configuración desde variables de entorno (mejor práctica)
+// const serviceAccount = {
+//   projectId: process.env.FIREBASE_PROJECT_ID,
+//   clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+//   privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, '\n')
+// };
 
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount),
-  databaseURL: process.env.FIREBASE_DATABASE_URL
-});
+// admin.initializeApp({
+//   credential: admin.credential.cert(serviceAccount),
+//   databaseURL: process.env.FIREBASE_DATABASE_URL
+// });
 
-module.exports = {
-  auth: admin.auth(),
-  db: admin.firestore(),
-  admin  // Opcional: exportar el admin completo
-};
+// module.exports = {
+//   auth: admin.auth(),
+//   db: admin.firestore(),
+//   admin  // Opcional: exportar el admin completo
+// };
 
 // Servir archivos estáticos desde la carpeta actual
 app.use(express.static(path.join(__dirname, '')));
