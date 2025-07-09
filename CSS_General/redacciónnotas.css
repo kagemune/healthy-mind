@@ -1076,6 +1076,85 @@ body.dark-mode .color-option.selected {
   border-color: #e0e0e0;
 }
 
+/* === OPCIONES DE NOTA ADICIONALES === */
+.note-options {
+  background: white;
+  padding: 18px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0d8f0;
+  transition: all 0.3s ease;
+  margin: 20px 0;
+}
+
+.note-options:hover {
+  box-shadow: 0 4px 12px rgba(123, 0, 230, 0.15);
+}
+
+.note-options .privacy-option {
+  display: flex;
+  align-items: center;
+  margin: 12px 0;
+  padding: 8px 0;
+  transition: all 0.3s ease;
+}
+
+.note-options .privacy-option:hover {
+  transform: translateX(5px);
+}
+
+.note-options .privacy-option input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin-right: 12px;
+  cursor: pointer;
+  accent-color: var(--primary-color);
+  transform: scale(1.1);
+}
+
+.note-options .privacy-option label {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  user-select: none;
+}
+
+.note-options .privacy-option:hover label {
+  color: var(--primary-color);
+}
+
+.note-options .privacy-option .tooltip {
+  font-size: 12px;
+  color: #666;
+  font-style: italic;
+  font-weight: 400;
+}
+
+/* Modo oscuro para las opciones de nota */
+body.dark-mode .note-options {
+  background-color: #2d2d2d;
+  border-color: #404040;
+}
+
+body.dark-mode .note-options .privacy-option input[type="checkbox"] {
+  accent-color: #a855f7;
+}
+
+body.dark-mode .note-options .privacy-option label {
+  color: #e0e0e0;
+}
+
+body.dark-mode .note-options .privacy-option:hover label {
+  color: #a855f7;
+}
+
+body.dark-mode .note-options .privacy-option .tooltip {
+  color: #b0b0b0;
+}
 
 
 

@@ -327,36 +327,37 @@ function generarHTMLNota(nota, vista) {
   const estrellas = `${nota.fijada ? '📌' : ''} ${nota.favorita ? '⭐' : ''}`;
   const color = nota.color || obtenerColorAleatorio();
   const opciones = generarOpcionesHTML(vista);
-
-  // ⭐ MEJORADO: No truncar contenido aquí, dejarlo completo para expansión
   const contenidoCompleto = nota.content || 'Sin contenido';
 
   return `
     <div class="note-card ${color}" data-id="${nota.id}">
       <div class="note-header">
-        <h3>${nota.title || 'Sin título'} ${estrellas}</h3>
-        ${vista === 'notas' ? `
-          <div class="dropdown-menu-icon solo-mobile">
-            <i class="fa-solid fa-ellipsis-vertical"></i>
-            <ul class="dropdown-options">
-              ${opciones}
-            </ul>
-          </div>` : `
-          <div class="dropdown-menu-icon">
-            <i class="fa-solid fa-ellipsis-vertical"></i>
-            <ul class="dropdown-options">
-              ${opciones}
-            </ul>
-          </div>`}
+        <div class="note-title-section">
+          <h3>${nota.title || 'Sin título'} ${estrellas}</h3>
+          ${privacidad}
+        </div>
+        <div class="note-actions-section">
+          ${vista === 'notas' ? `
+            <div class="dropdown-menu-icon solo-mobile">
+              <i class="fa-solid fa-ellipsis-vertical"></i>
+              <ul class="dropdown-options">
+                ${opciones}
+              </ul>
+            </div>` : `
+            <div class="dropdown-menu-icon">
+              <i class="fa-solid fa-ellipsis-vertical"></i>
+              <ul class="dropdown-options">
+                ${opciones}
+              </ul>
+            </div>`}
+        </div>
       </div>
-      ${privacidad}
       <div class="note-content-preview" data-id="${nota.id}">
         ${contenidoCompleto}
       </div>
     </div>
   `;
 }
-
 function generarOpcionesHTML(vista) {
   switch (vista) {
     case 'archivadas':
@@ -1230,6 +1231,23 @@ class NotasPerfilManager {
 // ====== MODIFICACIONES A CLASES EXISTENTES ======
 
 // Modificar TabManager para manejar notas
+class TabManager {
+  constructor() {
+    this.activeTab = 'notas'; // Tab por defecto
+    this.initTabs();
+  }
+
+  initTabs() {
+    document.querySelectorAll(".tab-btn").forEach((btn) => {
+      btn.addEventListener("click", (e) => {
+        const tabName = e.target.dataset.tab;
+        if (tabName) {
+          this.cambiarTab(tabName);
+        }
+      });
+    });
+  }
+}
 TabManager.prototype.cambiarTab = function(tabName) {
   document.querySelectorAll(".tab-btn").forEach((btn) => btn.classList.remove("active"));
   document.querySelectorAll(".tab-content").forEach((content) => content.classList.remove("active"));
@@ -1284,3 +1302,335 @@ document.addEventListener('DOMContentLoaded', () => {
   
   setTimeout(initNotasManager, 1000);
 });
+
+// === MEJORAR MENÚS DESPLEGABLES PARA MÓVIL ===
+// AGREGAR AL FINAL DEL ARCHIVO JS EXISTENTE
+
+// Mejorar eventos de dropdown para móvil
+function initMobileDropdowns() {
+  console.log("📱 Inicializando menús móviles mejorados");
+  
+  // Limpiar eventos anteriores del documento
+  document.removeEventListener("click", handleMobileDropdown);
+  document.removeEventListener("touchstart", handleMobileTouch);
+  
+  // Agregar nuevos eventos optimizados
+  document.addEventListener("click", handleMobileDropdown, true);
+  document.addEventListener("touchstart", handleMobileTouch, { passive: false });
+}
+
+// Manejar clicks en móvil
+function handleMobileDropdown(e) {
+  const isMobile = window.innerWidth <= 768;
+  if (!isMobile) return;
+  
+  const clickedIcon = e.target.closest(".dropdown-menu-icon i");
+  const clickedDropdown = e.target.closest(".dropdown-options");
+  const clickedAction = e.target.closest("[data-action]");
+  
+  console.log("📱 Click detectado:", { clickedIcon, clickedDropdown, clickedAction });
+  
+  // Si hace click en una acción, ejecutar y cerrar
+  if (clickedAction) {
+    e.preventDefault();
+    e.stopPropagation();
+    closeAllMobileDropdowns();
+    return;
+  }
+  
+  // Si hace click en el ícono de tres puntos
+  if (clickedIcon) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const dropdownIcon = clickedIcon.closest(".dropdown-menu-icon");
+    const dropdown = dropdownIcon?.querySelector(".dropdown-options");
+    
+    if (dropdown) {
+      console.log("📱 Toggling dropdown");
+      closeAllMobileDropdowns();
+      
+      // Mostrar el menú actual
+      if (!dropdown.classList.contains("show")) {
+        openMobileDropdown(dropdown, dropdownIcon);
+      }
+    }
+    return;
+  }
+  
+  // Si hace click dentro del dropdown, no cerrar
+  if (clickedDropdown) {
+    e.stopPropagation();
+    return;
+  }
+  
+  // Si hace click fuera, cerrar todos los menús
+  closeAllMobileDropdowns();
+}
+
+// Manejar toques táctiles
+function handleMobileTouch(e) {
+  const isMobile = window.innerWidth <= 768;
+  if (!isMobile) return;
+  
+  const touchedIcon = e.target.closest(".dropdown-menu-icon i");
+  
+  if (touchedIcon) {
+    console.log("📱 Touch en ícono detectado");
+    
+    // Feedback visual
+    touchedIcon.style.transform = "scale(0.95)";
+    setTimeout(() => {
+      touchedIcon.style.transform = "";
+    }, 150);
+  }
+}
+
+// Abrir dropdown móvil
+function openMobileDropdown(dropdown, icon) {
+  const noteCard = dropdown.closest(".note-card");
+  
+  console.log("📱 Abriendo dropdown móvil");
+  
+  // Elevar la nota
+  if (noteCard) {
+    noteCard.style.zIndex = "999999";
+    noteCard.style.position = "relative";
+  }
+  
+  // Mostrar el dropdown
+  dropdown.classList.add("show");
+  dropdown.style.display = "block";
+  dropdown.style.visibility = "visible";
+  
+  // Forzar animación
+  setTimeout(() => {
+    dropdown.style.opacity = "1";
+    dropdown.style.transform = "translateY(0) scale(1)";
+  }, 10);
+  
+  // Ajustar posición si se sale de pantalla
+  adjustMobileDropdownPosition(dropdown);
+}
+
+// Cerrar dropdown específico
+function closeMobileDropdown(dropdown) {
+  const noteCard = dropdown.closest(".note-card");
+  
+  dropdown.style.opacity = "0";
+  dropdown.style.transform = "translateY(-10px) scale(0.95)";
+  
+  setTimeout(() => {
+    dropdown.classList.remove("show");
+    dropdown.style.display = "none";
+    dropdown.style.visibility = "hidden";
+    
+    // Resetear z-index de la nota
+    if (noteCard) {
+      noteCard.style.zIndex = "";
+      noteCard.style.position = "";
+    }
+  }, 300);
+}
+
+// Cerrar todos los dropdowns móviles
+function closeAllMobileDropdowns() {
+  const openDropdowns = document.querySelectorAll(".dropdown-options.show");
+  
+  openDropdowns.forEach(dropdown => {
+    closeMobileDropdown(dropdown);
+  });
+  
+  if (openDropdowns.length > 0) {
+    console.log("📱 Cerrando todos los menús móviles");
+  }
+}
+
+// Ajustar posición del dropdown
+function adjustMobileDropdownPosition(dropdown) {
+  const rect = dropdown.getBoundingClientRect();
+  const viewportWidth = window.innerWidth;
+  const viewportHeight = window.innerHeight;
+  
+  // Si se sale por la derecha
+  if (rect.right > viewportWidth - 10) {
+    dropdown.style.right = "10px";
+    dropdown.style.left = "auto";
+  }
+  
+  // Si se sale por abajo
+  if (rect.bottom > viewportHeight - 10) {
+    dropdown.style.top = "auto";
+    dropdown.style.bottom = "100%";
+    dropdown.style.marginBottom = "4px";
+    dropdown.style.marginTop = "0";
+  }
+}
+
+// Inicializar cuando se cargan las notas (integración con código existente)
+const originalCargarNotasFunc = window.cargarNotas;
+if (originalCargarNotasFunc && typeof originalCargarNotasFunc === 'function') {
+  window.cargarNotas = async function(...args) {
+    const result = await originalCargarNotasFunc.apply(this, args);
+    
+    // Inicializar dropdowns móviles después de cargar notas
+    if (window.innerWidth <= 768) {
+      setTimeout(() => {
+        initMobileDropdowns();
+      }, 200);
+    }
+    
+    return result;
+  };
+}
+
+// Inicializar al cargar la página
+document.addEventListener('DOMContentLoaded', () => {
+  if (window.innerWidth <= 768) {
+    console.log("📱 Detectado móvil, inicializando menús");
+    setTimeout(() => {
+      initMobileDropdowns();
+    }, 500);
+  }
+});
+
+// Reinicializar al cambiar tamaño de pantalla
+window.addEventListener('resize', () => {
+  if (window.innerWidth <= 768) {
+    setTimeout(() => {
+      closeAllMobileDropdowns();
+      initMobileDropdowns();
+    }, 100);
+  }
+});
+
+// Funciones de debug
+window.debugMobileDropdowns = function() {
+  const dropdowns = document.querySelectorAll(".dropdown-options");
+  console.log("🔍 Debug dropdowns móviles:", dropdowns.length);
+  dropdowns.forEach((dropdown, index) => {
+    console.log(`Dropdown ${index + 1}:`, {
+      visible: dropdown.classList.contains("show"),
+      display: getComputedStyle(dropdown).display,
+      zIndex: getComputedStyle(dropdown).zIndex
+    });
+  });
+};
+
+window.closeAllMobileDropdowns = closeAllMobileDropdowns;
+
+console.log("✅ JavaScript de menús móviles cargado");
+// === FUNCIONALIDAD DARK MODE ===
+document.addEventListener('DOMContentLoaded', () => {
+  const themeToggle = document.getElementById('theme-toggle');
+  const themeIcon = themeToggle.querySelector('i');
+  
+  // Verificar si hay un tema guardado en localStorage
+  const currentTheme = localStorage.getItem('theme');
+  
+  // Aplicar tema inicial
+  if (currentTheme === 'dark') {
+    document.body.classList.add('dark-mode');
+    themeIcon.classList.remove('fa-moon');
+    themeIcon.classList.add('fa-sun');
+  } else {
+    document.body.classList.remove('dark-mode');
+    themeIcon.classList.remove('fa-sun');
+    themeIcon.classList.add('fa-moon');
+  }
+  
+  // Función para cambiar tema
+  function toggleTheme() {
+    // Agregar clase de rotación
+    themeToggle.classList.add('rotating');
+    
+    // Cambiar tema después de un pequeño delay para la animación
+    setTimeout(() => {
+      if (document.body.classList.contains('dark-mode')) {
+        // Cambiar a modo claro
+        document.body.classList.remove('dark-mode');
+        themeIcon.classList.remove('fa-sun');
+        themeIcon.classList.add('fa-moon');
+        localStorage.setItem('theme', 'light');
+        
+        // Mostrar notificación
+        mostrarNotificacion('Modo claro activado', 'success');
+      } else {
+        // Cambiar a modo oscuro
+        document.body.classList.add('dark-mode');
+        themeIcon.classList.remove('fa-moon');
+        themeIcon.classList.add('fa-sun');
+        localStorage.setItem('theme', 'dark');
+        
+        // Mostrar notificación
+        mostrarNotificacion('Modo oscuro activado', 'success');
+      }
+      
+      // Remover clase de rotación
+      themeToggle.classList.remove('rotating');
+    }, 150);
+  }
+  
+  // Event listener para el botón
+  themeToggle.addEventListener('click', toggleTheme);
+  
+  // Función para mostrar notificaciones (si no existe)
+  function mostrarNotificacion(texto, tipo = 'info') {
+    const notification = document.getElementById('notification');
+    const notificationText = document.getElementById('notification-text');
+    
+    if (notification && notificationText) {
+      notificationText.textContent = texto;
+      notification.classList.add('show');
+      
+      // Ocultar después de 3 segundos
+      setTimeout(() => {
+        notification.classList.remove('show');
+      }, 3000);
+    }
+  }
+  
+  // Detectar preferencia del sistema (opcional)
+  function detectSystemTheme() {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      return 'dark';
+    }
+    return 'light';
+  }
+  
+  // Si no hay tema guardado, usar la preferencia del sistema
+  if (!currentTheme) {
+    const systemTheme = detectSystemTheme();
+    if (systemTheme === 'dark') {
+      document.body.classList.add('dark-mode');
+      themeIcon.classList.remove('fa-moon');
+      themeIcon.classList.add('fa-sun');
+      localStorage.setItem('theme', 'dark');
+    }
+  }
+  
+  // Escuchar cambios en la preferencia del sistema
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+      if (!localStorage.getItem('theme')) {
+        if (e.matches) {
+          document.body.classList.add('dark-mode');
+          themeIcon.classList.remove('fa-moon');
+          themeIcon.classList.add('fa-sun');
+        } else {
+          document.body.classList.remove('dark-mode');
+          themeIcon.classList.remove('fa-sun');
+          themeIcon.classList.add('fa-moon');
+        }
+      }
+    });
+  }
+});
+
+// Función global para alternar tema (opcional, por si la necesitas desde otro lugar)
+window.toggleDarkMode = function() {
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.click();
+  }
+};

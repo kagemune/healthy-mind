@@ -183,10 +183,10 @@ p:last-of-type {
 }
 
 .member-photo {
-    width: 140px; /* Tamaño ajustado */
-    height: 140px;
+    width: 200px; /* Tamaño ajustado */
+    height: 290px;
     border-radius: 50%; /* Círculo perfecto */
-    background-color: #f18aff; /* Color de fondo si no hay imagen */
+    background-color: #ffffff; /* Color de fondo si no hay imagen */
     margin: 0 auto 20px; /* Centrado y con espacio debajo */
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
     position: relative;
@@ -196,8 +196,8 @@ p:last-of-type {
 
 .member-photo img { /* Estilo para la imagen dentro del contenedor */
     display: block;
-    width: 100%;
-    height: 100%;
+    width: 200px; /* Tamaño ajustado */
+    height: 290px;
     object-fit: cover; /* Asegura que la imagen cubra el círculo */
 }
 
@@ -530,7 +530,6 @@ p:last-of-type {
 
 /* Móviles grandes y Tablets pequeñas (hasta 768px) */
 @media (max-width: 768px) {
-    
 
     .header {
         grid-template-columns: 1fr; /* Una sola columna */
@@ -597,6 +596,10 @@ p:last-of-type {
         width: 120px;
         height: 120px;
     }
+    .member-photo img {
+    width: 100px;
+    height: 100px;
+}
 
 
     .valores-grid {
@@ -651,6 +654,10 @@ p:last-of-type {
         width: 100px;
         height: 100px;
     }
+    .member-photo img {
+    width: 100px;
+    height: 100px;
+}
 
     .mision-vision {
         gap: 20px;

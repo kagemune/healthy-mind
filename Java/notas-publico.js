@@ -239,7 +239,7 @@ class NotasPerfilUnificado {
 
   // ====== MOSTRAR CONTENIDO CON NOTAS ======
   mostrarContenidoConNotas(container, notas) {
-    const stats = this.calcularEstadisticas(notas);
+    const stats = this.calcularEstadisticas(this.notasCache); // ✨ Usar notasCache para stats correctas
     
     // Filtros diferentes según el tipo de perfil
     const filtrosOptions = this.tipoPerfilActual === 'mi_perfil' ? `
@@ -261,6 +261,7 @@ class NotasPerfilUnificado {
           ${this.tipoPerfilActual === 'mi_perfil' ? 
             `<span class="stat-item">🔒 ${stats.privadas} privadas</span>` : ''}
           <span class="stat-item">⭐ ${stats.favoritas} favoritas</span>
+          <span class="stat-item">📌 ${stats.fijadas} fijadas</span>
         </div>
         
         <div class="notas-filtros">
@@ -275,6 +276,7 @@ class NotasPerfilUnificado {
       </div>
     `;
 
+    // ✨ Configurar eventos después de crear el HTML
     this.configurarEventosFiltro();
     this.configurarEventosNotas();
   }
@@ -332,12 +334,48 @@ class NotasPerfilUnificado {
   configurarEventosFiltro() {
     const filtroSelect = document.getElementById('filtro-notas-perfil');
     if (filtroSelect) {
+      // ✨ Mantener el filtro actual seleccionado
       filtroSelect.value = this.filtroActual;
-      filtroSelect.addEventListener('change', (e) => {
+      
+      // ✨ Remover listener anterior si existe
+      filtroSelect.removeEventListener('change', this.handleFiltroChange);
+      
+      // ✨ Crear función bound para poder removerla después
+      this.handleFiltroChange = (e) => {
+        console.log(`🔍 Aplicando filtro: ${e.target.value}`);
         this.filtroActual = e.target.value;
-        this.renderizarNotas();
-      });
+        this.aplicarFiltroYRenderizar();
+      };
+      
+      filtroSelect.addEventListener('change', this.handleFiltroChange);
     }
+  }
+
+  // ====== APLICAR FILTRO Y RENDERIZAR SOLO EL GRID ======
+  aplicarFiltroYRenderizar() {
+    const grid = document.getElementById('notas-perfil-grid');
+    if (!grid) return;
+
+    const notasParaMostrar = this.aplicarFiltro(this.notasCache);
+    console.log(`📋 Mostrando ${notasParaMostrar.length} notas con filtro: ${this.filtroActual}`);
+
+    if (notasParaMostrar.length === 0) {
+      grid.innerHTML = `
+        <div class="no-resultados-filtro">
+          <i class="bi bi-search"></i>
+          <h4>No se encontraron notas</h4>
+          <p>No hay notas que coincidan con el filtro "${this.obtenerNombreFiltro()}"</p>
+          <button onclick="window.notasPublico.cambiarFiltro('todas')" class="btn-ver-todas">
+            Ver todas las notas
+          </button>
+        </div>
+      `;
+    } else {
+      grid.innerHTML = notasParaMostrar.map(nota => this.crearTarjetaNota(nota)).join('');
+    }
+
+    // ✨ Reconfigurar eventos de notas después de renderizar
+    this.configurarEventosNotas();
   }
 
   // ====== CONFIGURAR EVENTOS DE NOTAS ======
@@ -463,14 +501,31 @@ class NotasPerfilUnificado {
     return indicadores.join('');
   }
 
+  // ====== APLICAR FILTRO MEJORADO ======
   aplicarFiltro(notas) {
+    console.log(`🔍 Aplicando filtro "${this.filtroActual}" a ${notas.length} notas`);
+    
+    let notasFiltradas = [];
+    
     switch (this.filtroActual) {
-      case 'publicas': return notas.filter(nota => !nota.privada);
-      case 'privadas': return notas.filter(nota => nota.privada);
-      case 'favoritas': return notas.filter(nota => nota.favorita);
-      case 'fijadas': return notas.filter(nota => nota.fijada);
-      default: return notas;
+      case 'publicas': 
+        notasFiltradas = notas.filter(nota => !nota.privada);
+        break;
+      case 'privadas': 
+        notasFiltradas = notas.filter(nota => nota.privada);
+        break;
+      case 'favoritas': 
+        notasFiltradas = notas.filter(nota => nota.favorita === true);
+        break;
+      case 'fijadas': 
+        notasFiltradas = notas.filter(nota => nota.fijada === true);
+        break;
+      default: 
+        notasFiltradas = notas;
     }
+    
+    console.log(`📋 Resultado del filtro: ${notasFiltradas.length} notas`);
+    return notasFiltradas;
   }
 
   calcularEstadisticas(notas) {
@@ -478,8 +533,8 @@ class NotasPerfilUnificado {
       total: notas.length,
       publicas: notas.filter(n => !n.privada).length,
       privadas: notas.filter(n => n.privada).length,
-      favoritas: notas.filter(n => n.favorita).length,
-      fijadas: notas.filter(n => n.fijada).length
+      favoritas: notas.filter(n => n.favorita === true).length,
+      fijadas: notas.filter(n => n.fijada === true).length
     };
   }
 
@@ -501,11 +556,32 @@ class NotasPerfilUnificado {
         <i class="bi bi-exclamation-triangle-fill"></i>
         <h3>Error</h3>
         <p>${mensaje}</p>
-        <button onclick="window.notasPerfilUnificado.renderizarNotas()" class="btn-reintentar">
+        <button onclick="window.notasPublico.renderizarNotas()" class="btn-reintentar">
           Reintentar
         </button>
       </div>
     `;
+  }
+
+  // ====== MÉTODOS PÚBLICOS ADICIONALES ======
+  cambiarFiltro(filtro) {
+    this.filtroActual = filtro;
+    const filtroSelect = document.getElementById('filtro-notas-perfil');
+    if (filtroSelect) {
+      filtroSelect.value = filtro;
+    }
+    this.aplicarFiltroYRenderizar();
+  }
+
+  obtenerNombreFiltro() {
+    const nombres = {
+      'todas': 'Todas las notas',
+      'publicas': 'Públicas',
+      'privadas': 'Privadas',
+      'favoritas': 'Favoritas',
+      'fijadas': 'Fijadas'
+    };
+    return nombres[this.filtroActual] || this.filtroActual;
   }
 
   // ====== API PÚBLICA ======
