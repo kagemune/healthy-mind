@@ -229,9 +229,9 @@ process.on('SIGINT', () => {
   process.exit(0);
 });
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT,'0.0.0.0', () => {
   console.log(`Servidor de moderación automática corriendo en el puerto ${PORT}`);
   console.log(`Debounce configurado a ${DEBOUNCE_DELAY}ms para optimizar llamadas a la API`);
   console.log(`Cache activado con duración de ${CACHE_DURATION/1000/60} minutos`);
