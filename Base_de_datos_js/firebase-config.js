@@ -14,6 +14,12 @@ const firebaseConfig = {
 // Inicializar Firebase
 firebase.initializeApp(firebaseConfig);
 
+if (!firebase.apps.length) {
+   firebase.initializeApp(firebaseConfig);
+ } else {
+   firebase.app(); // Si ya está inicializado, usa la instancia existente
+ }
+
 // Referencias a servicios
 const auth = firebase.auth();
 const db = firebase.firestore();
